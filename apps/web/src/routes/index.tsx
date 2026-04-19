@@ -1,9 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/')({
-  component: () => (
-    <main className="min-h-screen grid place-items-center">
-      <div className="text-ink text-sm">Performance Management — scaffolding ready.</div>
-    </main>
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: '/me' });
+  },
 });
