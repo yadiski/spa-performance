@@ -5,11 +5,11 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import postgres from 'postgres';
-import { db } from '../src/db/client';
 import { writeAudit } from '../src/audit/log';
 import { verifyChain } from '../src/audit/verifier';
+import { db } from '../src/db/client';
 
 describe('audit log', () => {
   beforeEach(async () => {
@@ -23,13 +23,23 @@ describe('audit log', () => {
     await db.transaction(async (tx) => {
       await writeAudit(tx, {
         eventType: 'test.one',
-        actorId: null, actorRole: null, targetType: null, targetId: null,
-        payload: { a: 1 }, ip: null, ua: null,
+        actorId: null,
+        actorRole: null,
+        targetType: null,
+        targetId: null,
+        payload: { a: 1 },
+        ip: null,
+        ua: null,
       });
       await writeAudit(tx, {
         eventType: 'test.two',
-        actorId: null, actorRole: null, targetType: null, targetId: null,
-        payload: { b: 2 }, ip: null, ua: null,
+        actorId: null,
+        actorRole: null,
+        targetType: null,
+        targetId: null,
+        payload: { b: 2 },
+        ip: null,
+        ua: null,
       });
     });
     const today = new Date().toISOString().slice(0, 10);
@@ -41,8 +51,13 @@ describe('audit log', () => {
     await db.transaction(async (tx) => {
       await writeAudit(tx, {
         eventType: 'test.trigger',
-        actorId: null, actorRole: null, targetType: null, targetId: null,
-        payload: {}, ip: null, ua: null,
+        actorId: null,
+        actorRole: null,
+        targetType: null,
+        targetId: null,
+        payload: {},
+        ip: null,
+        ua: null,
       });
     });
     const client = postgres(process.env.DATABASE_URL!, { max: 1 });

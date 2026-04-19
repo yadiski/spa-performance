@@ -15,7 +15,9 @@ export function AppShell({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-screen grid grid-cols-[220px_1fr]">
       <aside className="border-r border-hairline bg-surface p-4 space-y-2">
-        <div className="text-xs font-semibold tracking-wide text-ink-2 uppercase mb-4">Performance</div>
+        <div className="text-xs font-semibold tracking-wide text-ink-2 uppercase mb-4">
+          Performance
+        </div>
         {sections.map((s) => (
           <Link
             key={s.to}

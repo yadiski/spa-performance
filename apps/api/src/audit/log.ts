@@ -22,7 +22,9 @@ export async function writeAudit(tx: any, input: AuditInput): Promise<Uint8Array
     select hash from audit_log order by id desc limit 1 for update
   `);
   // drizzle/postgres-js returns an array-like result (not { rows: [...] })
-  const rows = (Array.isArray(res) ? res : (res as { rows?: unknown[] }).rows ?? []) as Array<{ hash: Uint8Array }>;
+  const rows = (Array.isArray(res) ? res : ((res as { rows?: unknown[] }).rows ?? [])) as Array<{
+    hash: Uint8Array;
+  }>;
   const last = rows[0];
 
   // Normalize prev hash — postgres-js may return Buffer, convert to Uint8Array

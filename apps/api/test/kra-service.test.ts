@@ -5,14 +5,14 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
+import { KraPerspective } from '@spa/shared';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
+import type { Actor } from '../src/auth/middleware';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
-import type { Actor } from '../src/auth/middleware';
-import { saveKraDraft, submitKras, approveKras, rejectKras } from '../src/domain/kra/service';
-import { KraPerspective } from '@spa/shared';
+import { approveKras, rejectKras, saveKraDraft, submitKras } from '../src/domain/kra/service';
 
 function mkActor(overrides: Partial<Actor>): Actor {
   return {
@@ -37,7 +37,10 @@ const validKra = (order: number, weight = 25) => ({
 });
 
 describe('kra service', () => {
-  let mgrStaffId: string, staffStaffId: string, mgrUserId: string, staffUserId: string;
+  let mgrStaffId: string;
+  let staffStaffId: string;
+  let mgrUserId: string;
+  let staffUserId: string;
   let cycleId: string;
 
   beforeEach(async () => {
@@ -48,19 +51,38 @@ describe('kra service', () => {
     await client.end({ timeout: 2 });
 
     const [o] = await db.insert(s.organization).values({ name: 'Acme' }).returning();
-    const [d] = await db.insert(s.department).values({ orgId: o!.id, name: 'IT', code: 'IT' }).returning();
-    const [g] = await db.insert(s.grade).values({ orgId: o!.id, code: 'E07', rank: '7' }).returning();
+    const [d] = await db
+      .insert(s.department)
+      .values({ orgId: o!.id, name: 'IT', code: 'IT' })
+      .returning();
+    const [g] = await db
+      .insert(s.grade)
+      .values({ orgId: o!.id, code: 'E07', rank: '7' })
+      .returning();
 
-    const [mgrUser] = await db.insert(s.user).values({ email: 'mgr@t', name: 'Manager' }).returning();
-    const [staffUser] = await db.insert(s.user).values({ email: 'staff@t', name: 'Staff' }).returning();
+    const [mgrUser] = await db
+      .insert(s.user)
+      .values({ email: 'mgr@t', name: 'Manager' })
+      .returning();
+    const [staffUser] = await db
+      .insert(s.user)
+      .values({ email: 'staff@t', name: 'Staff' })
+      .returning();
     mgrUserId = mgrUser!.id;
     staffUserId = staffUser!.id;
 
     const [mgrStaff] = await db
       .insert(s.staff)
       .values({
-        userId: mgrUser!.id, orgId: o!.id, employeeNo: 'M001', name: 'Manager',
-        designation: 'Manager', departmentId: d!.id, gradeId: g!.id, managerId: null, hireDate: '2020-01-01',
+        userId: mgrUser!.id,
+        orgId: o!.id,
+        employeeNo: 'M001',
+        name: 'Manager',
+        designation: 'Manager',
+        departmentId: d!.id,
+        gradeId: g!.id,
+        managerId: null,
+        hireDate: '2020-01-01',
       })
       .returning();
     mgrStaffId = mgrStaff!.id;
@@ -68,8 +90,14 @@ describe('kra service', () => {
     const [staffRec] = await db
       .insert(s.staff)
       .values({
-        userId: staffUser!.id, orgId: o!.id, employeeNo: 'S001', name: 'Staff',
-        designation: 'Engineer', departmentId: d!.id, gradeId: g!.id, managerId: mgrStaff!.id,
+        userId: staffUser!.id,
+        orgId: o!.id,
+        employeeNo: 'S001',
+        name: 'Staff',
+        designation: 'Engineer',
+        departmentId: d!.id,
+        gradeId: g!.id,
+        managerId: mgrStaff!.id,
         hireDate: '2022-01-01',
       })
       .returning();
@@ -127,7 +155,10 @@ describe('kra service', () => {
     const [afterReject] = await db.select().from(s.performanceCycle).where(sql`id = ${cycleId}`);
     expect(afterReject?.state).toBe('kra_drafting');
 
-    const transitions = await db.select().from(s.approvalTransition).where(sql`cycle_id = ${cycleId}`);
+    const transitions = await db
+      .select()
+      .from(s.approvalTransition)
+      .where(sql`cycle_id = ${cycleId}`);
     expect(transitions.length).toBe(2);
     const rejectT = transitions.find((t) => t.toState === 'kra_drafting');
     expect(rejectT?.note).toBe('KRA 1 needs measurable target');

@@ -1,4 +1,4 @@
-import { Role } from '@spa/shared';
+import type { Role } from '@spa/shared';
 
 export const Permissions = {
   CycleOpen: 'cycle.open',
@@ -17,7 +17,14 @@ export type Permission = (typeof Permissions)[keyof typeof Permissions];
 
 export const rolePermissions: Record<Role, Permission[]> = {
   staff: ['staff.read.self', 'kra.draft', 'kra.submit'],
-  appraiser: ['staff.read.self', 'staff.read.report', 'kra.approve', 'kra.reject', 'kra.draft', 'kra.submit'],
+  appraiser: [
+    'staff.read.self',
+    'staff.read.report',
+    'kra.approve',
+    'kra.reject',
+    'kra.draft',
+    'kra.submit',
+  ],
   next_level: ['staff.read.self', 'staff.read.report'],
   department_head: ['staff.read.dept'],
   hr_manager: ['staff.read.org', 'audit.read'],

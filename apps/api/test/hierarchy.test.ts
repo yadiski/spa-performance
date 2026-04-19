@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as s from '../src/db/schema';
@@ -8,21 +8,37 @@ describe('hierarchy resolvers', () => {
   const adminUrl = process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/spa';
   const client = postgres(adminUrl, { max: 1 });
   const db = drizzle(client, { schema: s });
-  let ceoStaff: string, vpStaff: string, mgrStaff: string, icStaff: string;
+  let ceoStaff: string;
+  let vpStaff: string;
+  let mgrStaff: string;
+  let icStaff: string;
 
   beforeEach(async () => {
     // cascade-truncate everything that depends on user/org/dept/grade
-    await client.unsafe(`truncate table staff_role, staff, grade, department, organization, "user" cascade`);
+    await client.unsafe(
+      `truncate table staff_role, staff, grade, department, organization, "user" cascade`,
+    );
 
     const [o] = await db.insert(s.organization).values({ name: 'Acme' }).returning();
-    const [d] = await db.insert(s.department).values({ orgId: o!.id, name: 'IT', code: 'IT' }).returning();
-    const [g] = await db.insert(s.grade).values({ orgId: o!.id, code: 'E10', rank: '10' }).returning();
+    const [d] = await db
+      .insert(s.department)
+      .values({ orgId: o!.id, name: 'IT', code: 'IT' })
+      .returning();
+    const [g] = await db
+      .insert(s.grade)
+      .values({ orgId: o!.id, code: 'E10', rank: '10' })
+      .returning();
 
     const mkUser = async (email: string, name: string) => {
       const [u] = await db.insert(s.user).values({ email, name }).returning();
       return u!.id;
     };
-    const mkStaff = async (userId: string, employeeNo: string, name: string, mgr: string | null) => {
+    const mkStaff = async (
+      userId: string,
+      employeeNo: string,
+      name: string,
+      mgr: string | null,
+    ) => {
       const [x] = await db
         .insert(s.staff)
         .values({

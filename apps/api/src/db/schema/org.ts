@@ -10,7 +10,9 @@ export const organization = pgTable('organization', {
 
 export const department = pgTable('department', {
   id: uuid('id').primaryKey().defaultRandom(),
-  orgId: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organization.id, { onDelete: 'restrict' }),
   name: text('name').notNull(),
   code: text('code').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -18,7 +20,9 @@ export const department = pgTable('department', {
 
 export const grade = pgTable('grade', {
   id: uuid('id').primaryKey().defaultRandom(),
-  orgId: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organization.id, { onDelete: 'restrict' }),
   code: text('code').notNull(),
   rank: text('rank').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

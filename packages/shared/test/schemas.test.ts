@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { kraCreateBatch, CycleState, Role } from '../src/index';
+import { CycleState, Role, kraCreateBatch } from '../src/index';
 
 describe('kraCreateBatch', () => {
   const validKra = {

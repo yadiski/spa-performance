@@ -11,10 +11,14 @@ export async function directReports(db: DB, managerId: string): Promise<StaffRow
     order by name asc
   `);
   // execute returns an array or result with rows property depending on driver
-  return Array.isArray(rows) ? rows : (rows as any)?.rows || [];
+  return Array.isArray(rows) ? rows : ((rows as { rows?: StaffRow[] })?.rows ?? []);
 }
 
-export async function transitiveReports(db: DB, managerId: string, maxDepth: number): Promise<StaffRow[]> {
+export async function transitiveReports(
+  db: DB,
+  managerId: string,
+  maxDepth: number,
+): Promise<StaffRow[]> {
   const rows = await db.execute<StaffRow>(sql`
     with recursive tree as (
       select id, name, employee_no, manager_id, 1 as depth
@@ -28,5 +32,5 @@ export async function transitiveReports(db: DB, managerId: string, maxDepth: num
     order by depth, name
   `);
   // execute returns an array or result with rows property depending on driver
-  return Array.isArray(rows) ? rows : (rows as any)?.rows || [];
+  return Array.isArray(rows) ? rows : ((rows as { rows?: StaffRow[] })?.rows ?? []);
 }

@@ -5,13 +5,13 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
+import type { Actor } from '../src/auth/middleware';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
 import { staffReadScope } from '../src/rbac/scope';
-import type { Actor } from '../src/auth/middleware';
 
 function mkActor(overrides: Partial<Actor>): Actor {
   return {
@@ -26,7 +26,10 @@ function mkActor(overrides: Partial<Actor>): Actor {
 }
 
 describe('staffReadScope', () => {
-  let ceoStaff: string, vpStaff: string, mgrStaff: string, icStaff: string;
+  let ceoStaff: string;
+  let vpStaff: string;
+  let mgrStaff: string;
+  let icStaff: string;
 
   beforeEach(async () => {
     const client = postgres(process.env.DATABASE_URL!, { max: 1 });
@@ -34,14 +37,25 @@ describe('staffReadScope', () => {
     await client.end({ timeout: 2 });
 
     const [o] = await db.insert(s.organization).values({ name: 'Acme' }).returning();
-    const [d] = await db.insert(s.department).values({ orgId: o!.id, name: 'IT', code: 'IT' }).returning();
-    const [g] = await db.insert(s.grade).values({ orgId: o!.id, code: 'E10', rank: '10' }).returning();
+    const [d] = await db
+      .insert(s.department)
+      .values({ orgId: o!.id, name: 'IT', code: 'IT' })
+      .returning();
+    const [g] = await db
+      .insert(s.grade)
+      .values({ orgId: o!.id, code: 'E10', rank: '10' })
+      .returning();
 
     const mkUser = async (email: string, name: string) => {
       const [u] = await db.insert(s.user).values({ email, name }).returning();
       return u!.id;
     };
-    const mkStaff = async (userId: string, employeeNo: string, name: string, mgr: string | null) => {
+    const mkStaff = async (
+      userId: string,
+      employeeNo: string,
+      name: string,
+      mgr: string | null,
+    ) => {
       const [x] = await db
         .insert(s.staff)
         .values({
@@ -68,7 +82,9 @@ describe('staffReadScope', () => {
   async function visibleIds(actor: Actor): Promise<string[]> {
     const pred = await staffReadScope(db, actor);
     const result = await db.execute(sql`select id from staff where ${pred}`);
-    const rows: Array<{ id: string }> = Array.isArray(result) ? result : (result as any)?.rows ?? [];
+    const rows = (
+      Array.isArray(result) ? result : ((result as { rows?: unknown[] })?.rows ?? [])
+    ) as Array<{ id: string }>;
     return rows.map((r) => r.id).sort();
   }
 

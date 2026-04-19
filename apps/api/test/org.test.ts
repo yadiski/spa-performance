@@ -5,7 +5,7 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import postgres from 'postgres';
 import { db } from '../src/db/client';
 import * as schema from '../src/db/schema';
@@ -18,7 +18,10 @@ describe('org schema', () => {
   });
 
   it('inserts + reads an organization', async () => {
-    const [inserted] = await db.insert(schema.organization).values({ name: 'Acme Sdn Bhd' }).returning();
+    const [inserted] = await db
+      .insert(schema.organization)
+      .values({ name: 'Acme Sdn Bhd' })
+      .returning();
     expect(inserted?.name).toBe('Acme Sdn Bhd');
   });
 });

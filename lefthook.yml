@@ -1,0 +1,23 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: lint
+      run: bun run lint
+      glob: '*.{ts,tsx,js,jsx,json,css}'
+
+    - name: typecheck-shared
+      run: cd packages/shared && bun run typecheck
+      glob: 'packages/shared/**/*.ts'
+
+    - name: typecheck-api
+      run: cd apps/api && bun run typecheck
+      glob: 'apps/api/**/*.ts'
+
+    - name: typecheck-web
+      run: cd apps/web && bun run typecheck
+      glob: 'apps/web/**/*.{ts,tsx}'
+
+pre-push:
+  jobs:
+    - name: build-web
+      run: cd apps/web && bun run build
