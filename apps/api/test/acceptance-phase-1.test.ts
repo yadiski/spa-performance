@@ -38,11 +38,12 @@ async function signIn(email: string, password: string): Promise<string> {
 }
 
 async function postAs(cookie: string, path: string, body?: unknown): Promise<Response> {
-  return app.request(path, {
+  const init: RequestInit = {
     method: 'POST',
     headers: { 'content-type': 'application/json', cookie },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  };
+  if (body !== undefined) init.body = JSON.stringify(body);
+  return app.request(path, init);
 }
 
 async function cleanDb(): Promise<void> {
