@@ -1,0 +1,290 @@
+{
+  "dimensions": [
+    {
+      "code": "communication_skills",
+      "title": "Communication Skills",
+      "description": "Ability to communicate both orally and in writing. Able to present ideas and arguments in a logical manner. Can deal with people of all levels.",
+      "order": 1,
+      "anchors": [
+        "Poor written and orally communications skills which require guidance and supervision. Always not accepting ideas and unwilling to cooperate.",
+        "Needs regular guidance to ensure quality in oral and written communication skills. Sometimes not willing to accept ideas and has friction with staff and supervisors.",
+        "Has ability to express thoughts and ideas clearly in either oral or written form. Does not misunderstand or cause others to misunderstand by bad communication. Willing to accept ideas from others. Practice open communication style and has fine interpersonal skills.",
+        "Able to express thoughts and ideas both orally and in written form. Receptive to ideas. Demonstrates quick and clear grasp of the significance of information communicated. Practice open communication style and has strong interpersonal skills.",
+        "Exceptional ability in expressing thoughts and ideas both orally and in writing. Extremely open to ideas from anywhere, seeks clarification to understand facts to rationalize thoughts. Strongly believe in open two-way communication with all levels. Displays skill in simplified complex information and helping others to understand that information. Excellent interpersonal skills."
+      ]
+    },
+    {
+      "code": "work_quantity_timeliness",
+      "title": "Work Quantity & Timeliness",
+      "description": "The volume of work accomplished under normal conditions and the promptness with which it is completed.",
+      "order": 2,
+      "anchors": [
+        "Work output is consistently low and regularly fails to complete assigned work tasks on time. The problem due to lack of skill, lack of concentration or lack of interest to complete the assigned work tasks.",
+        "Staff shows inconsistency in work output and often failing below the acceptable level. Working too slowly showing lack of concentration or consistency of effort. Work tasks and project are significantly late at times or left incomplete with potentially serious consequences. Insufficient skill in self-monitoring and self-regulating work rate.",
+        "Staff meets the work output requirements for the job. Assigned work tasks and projects are usually completed on time. Aware of the need to produce an acceptable level of work output and usually can self-monitor work rate to ensure that needed tasks are completed on time.",
+        "Staff usually displays high level work output. Some work tasks and projects are completed ahead of time and most are completed on time. At time seek out additional tasks and projects to complete or help others to complete their tasks and projects.",
+        "Staff shows a consistently high work output with sustained concentration and endurance clearly evident. Always complete assigned work tasks ahead of time. Always work efficiently and diligently on the task on hand putting in whatever time and effort is needed to complete an excellent job."
+      ]
+    },
+    {
+      "code": "staff_development",
+      "title": "Staff Development",
+      "description": "Ability to manage, motivate and encourage staff development through effective coaching, guidance and training.",
+      "order": 3,
+      "anchors": [
+        "Poor in managing and motivating staff. Is not aware of his/her duty to encourage and develop the staff.",
+        "Lacks ability in managing and motivating staff effectively; drives rather than motivates. Needs to be conscious of duty to encourage and develop staff.",
+        "Satisfactory in managing the staff but needs to be more conscious of responsibility to encourage and develop staff.",
+        "Effective in managing and motivating staff. Makes efforts to encourage and develop staff through coaching, guidance and training.",
+        "Exceptionally effective in managing and motivating staff. Leads by example by demonstrating own passion and energy. Able to tap potential and expand/stretch capacity/capability of subordinates to maximize productivity and effectiveness. Recognizes and rewards achievements."
+      ]
+    },
+    {
+      "code": "punctuality_absenteeism",
+      "title": "Punctuality and Absenteeism",
+      "description": "Maintaining a good attendance record including lunch break, meeting and company functions.",
+      "order": 4,
+      "anchors": [
+        "Habitual late-comer. And absenteeism.",
+        "Inconsistency in attendance. Absent without prior approved leave and with doubtful excuses. Utilization of annual leave exceeds the normal entitlement. Always on medical leave.",
+        "Occasionally absent without prior approved leave or on medical leave but prompt notification and valid explanations are given. Does not exceed in utilization of annual leave entitlement.",
+        "Rarely absent from work without prior approved leave. Only utilize earned leave and seldom on medical leave.",
+        "Always punctual and no lateness or unauthorized absence. Rarely on medical leave."
+      ]
+    },
+    {
+      "code": "adaptability_changes",
+      "title": "Adaptability to Changes",
+      "description": "Ability to cope with new changes, to adapt with the new working environment and new job functions easily. Able to handle high level of uncertainty pressure.",
+      "order": 5,
+      "anchors": [
+        "Unable to adapt to new changes. Panics when work under pressure.",
+        "Slow to adapt to new changes, and needs extra coaching and guidance. Unable to work well under pressure.",
+        "Adapts to change satisfactory and able to cope under uncertainty and pressure.",
+        "Adapt easily and able to accept changes well. Cope well under uncertainty and pressure.",
+        "Exceptionally adaptable and receptive to new changes. Works extremely clam under uncertainty and pressure."
+      ]
+    },
+    {
+      "code": "reliability",
+      "title": "Reliability",
+      "description": "Reliability in execution of assigned tasks, dependability in following instructions and stick to his job and able to produce good work without constant supervision.",
+      "order": 6,
+      "anchors": [
+        "Poor and unable to execute assigned tasks without constant supervision. Needs very close supervision.",
+        "Occasionally unable to execute assigned tasks without constant supervision. Need extra guidance and supervision.",
+        "Usually able to execute assigned tasks without constant supervision. Sometimes requires guidance and supervision.",
+        "Able to execute assigned tasks without constant supervision.",
+        "Exceptional ability to execute assigned tasks without constant supervision."
+      ]
+    },
+    {
+      "code": "customer_focused",
+      "title": "Customer Focused",
+      "description": "Ability to promote, sustain and enhance rapport and relationship with new & existing customer. Understand customers are core to company's business & profitability.",
+      "order": 7,
+      "anchors": [
+        "Complaints from customers/suppliers and make no effort to enhance relationship.",
+        "Lack effort to enhance relationship with customers/suppliers.",
+        "Generally have good customers/suppliers relation skills. Made reasonable effort to enhance relationship.",
+        "Has superior relationship with customers and suppliers. Take extra effort to further promote and enhance customers/suppliers relationship.",
+        "Always exhibits superior customers/suppliers relationship and make effort to enhance the relationship."
+      ]
+    },
+    {
+      "code": "quality_focused",
+      "title": "Quality Focused",
+      "description": "Thoroughness of work and ability to perform work of high grade that is work accuracy and attention to details.",
+      "order": 8,
+      "anchors": [
+        "Work quality is poor. The error rate is high and work regularly be rejected and has to be done again. Requires considerable supervision and unaware of work effectiveness is inadequate.",
+        "Work is below the quality standard set. The error and problem rate is usually higher than acceptable. Work sometimes requires substantial amendments and requires extra supervision.",
+        "Works meet the quality standard set and seldom requires checking on accuracy. He/she can be self-correct for errors and problems.",
+        "Work is of high grade, thorough, neat and accurate. Make worthy effort to live up to and meet quality standards set.",
+        "Exceptional quality of work at all times. Inspires and demonstrates a passion for perfectionism in every aspect of work. Have a reputation for setting the 'standard'. Strives to fulfil commitment to quality in work and consistently seek more effective ways of working."
+      ]
+    },
+    {
+      "code": "acceptance_instructions",
+      "title": "Acceptance of Instructions",
+      "description": "Able to accept instructions diligently and response rapidly.",
+      "order": 9,
+      "anchors": [
+        "Give many invalid excuses for not accepting instructions.",
+        "Gets things done only when prodded.",
+        "Generally accepts and carries our instructions rapidly.",
+        "Always accept instruction diligently and response rapidly.",
+        "Exceptional ability to take instruction diligently and respond immediately at all times."
+      ]
+    },
+    {
+      "code": "judgment",
+      "title": "Judgment",
+      "description": "Ability to render simple sound judgment and decision.",
+      "order": 10,
+      "anchors": [
+        "Avoid making decisions. Always waits for solutions.",
+        "Hesitates in making decisions and occasionally able to solve problems within own area of work.",
+        "Able to make logical decisions and solve problems within own area of work.",
+        "Always makes decisions quick based on relevant facts and finds good solutions to problems.",
+        "Think and act quickly. Able to make good decisions and take full responsibility for decision made."
+      ]
+    },
+    {
+      "code": "teamwork_cooperation",
+      "title": "Teamwork/Cooperation",
+      "description": "Willingness to work as a team and cooperate within the same department and with those in other departments.",
+      "order": 11,
+      "anchors": [
+        "Is frequently unwilling to cooperate. Says no when others requested for help.",
+        "Avoids helping others and seldom responds to the requests of others.",
+        "Cooperates well with staff members within and outside the department. Responds satisfactory to the requests of others.",
+        "Very cooperative and helpful to all staff members within and outside the department. Respond immediately to the requests of others.",
+        "Work harmoniously with staff members within and outside the department. Always respond to the request of others promptly."
+      ]
+    },
+    {
+      "code": "initiative",
+      "title": "Initiative",
+      "description": "Ability to get things done beyond normal job scope & responsibility proactively which contribute to attainment of team objectives/goals.",
+      "order": 12,
+      "anchors": [
+        "Has to be told what needs to be done.",
+        "Must be pushed to get things done. Requires supervision all the time.",
+        "Sometimes takes action to get things done and offers suggestions.",
+        "Frequently takes action to get things done and offer suggestions.",
+        "Consistently takes action to get things done and offer suggestions. Very proactive. Makes things happen despite constraints."
+      ]
+    },
+    {
+      "code": "learn_improve",
+      "title": "Ability to Learn and Improve",
+      "description": "Able to learn and apply new skills to improve work processes.",
+      "order": 13,
+      "anchors": [
+        "Is slow in learning and has difficulty even after repeated instructions or supervisions.",
+        "Learn with some difficulties and very rarely applies new skills at work.",
+        "Able to learn within the normal instructional period and sometimes applies new skills at work.",
+        "Able to learn quickly and frequently applies new skills at work.",
+        "Has great ability to learn an exceptional rate and consistently applies new skills at work."
+      ]
+    },
+    {
+      "code": "policy_knowledge",
+      "title": "Knowledge and Application of Policies",
+      "description": "Staff is aware of policies contained in Employee Handbook and other relevant manuals. Staff understands policies and rationale of policies and able to pinpoint policy references of opinion related to work.",
+      "order": 14,
+      "anchors": [
+        "Fails to meet requirements for policy compliance. Displays an apparent for important and routine policies that apply directly to the job and area. Seems to be unaware of the organization's history, context and rationale underlying policies and practices.",
+        "Show inconsistency in knowledge and/or application of policies and practices, even of routine ones that apply directly to the job area. Understanding of the history, context and rationale underlying the policies and practices may be limited. There may be an emerging pattern of non-compliance.",
+        "Always meets the organization's policy compliance requirements. Has a satisfactory knowledge of the organization's history, context and rationale that underlines them. Able to applies routine policies independently, but may need help when unusual situations arise. Would not deliberately or carelessly ignore an important policy and practice.",
+        "Show good level of knowledge of the organization's policies and practices, including at least some knowledge of their history, context and rationale that underlines them. Always comply and displays a good level of skill in applying policies and practices. In certain areas may be consulted by others for help and insight and may at times educate or persuade others to comply.",
+        "Show consistently and broad knowledge of the company's policies and practices including the history, context and rationale that underlines them. Demonstrates consistently high level of willingness to comply and skills to apply policies and practices. Takes a leading role in educating or persuading others to comply."
+      ]
+    },
+    {
+      "code": "computer_literacy",
+      "title": "Computer Literacy",
+      "description": "Ability to utilize the computer as a work tool to increase efficiency and productivity.",
+      "order": 15,
+      "anchors": [
+        "No computer knowledge and skills and do not make effort to learn to progress.",
+        "Basic computer knowledge and skills. Able to proceed with day to day work in a computerized environment.",
+        "Fair computer knowledge and skills. Able to identify minor problems.",
+        "Adequate computer knowledge and skills. Accepts that automation is necessary to move ahead and will join in willingly in initiatives to automate possesses for efficiency, time and cost savings.",
+        "Good computer knowledge and skills. Initiates programs/ideas to automate operating possesses to reduce time, cost and man hours to increase productivity."
+      ]
+    },
+    {
+      "code": "job_knowledge",
+      "title": "Knowledge of Job",
+      "description": "Clear understanding of purpose, objectives, method and procedures.",
+      "order": 16,
+      "anchors": [
+        "Staff regularly fails to meet the requirements of job knowledge. He/She is regularly unable to complete the normal work tasks without considerable guidance and support form others. As a result many task may be left incomplete or completed incorrectly.",
+        "Staff is showing consistency in meeting the requirements for job knowledge. At times he/she is unable to complete the normal tasks due to reason that he/she has not acquainted with some of the concepts in the knowledge/skill areas.",
+        "Staff at this level regularly meets the job knowledge requirements for the job. He/She is able to complete the normal work tasks without guidance and support from others except out-of-ordinary problems where he/she will consult others for help.",
+        "Staff shows high level of job knowledge, exceeding requirements in some areas, but not consistently not in all parts of his/her job. Regularly complete all the normal work tasks and at times unusual and difficult tasks independently. May at times be consulted by others for guidance.",
+        "Display consistently high level of job knowledge that regularly exceeds requirements. Consistently able to complete all the normal work tasks, as well as unusual and difficult tasks independently. Can be consulted by others and is recognized and trusted for job knowledge."
+      ]
+    },
+    {
+      "code": "work_habits",
+      "title": "Work Habits",
+      "description": "Helpful and cooperative, demonstrate professional attitude and behaviour that is right for the company and community at all times.",
+      "order": 17,
+      "anchors": [
+        "Unsatisfactory conduct and behaviour to the extent it affect the company's reputation. Unwilling to cooperate and develop frictions with others.",
+        "Occasional complaints on manner and behaviour. Sometimes finds it difficult to cooperate with others.",
+        "Staff conducts himself/herself according to standards set. Work well with others and responds satisfactorily to requests for assistance.",
+        "Show good conduct and behaviour at all times. Consistently cooperative and helpful. Can be trusted.",
+        "Show consistently high level of integrity and conducts at all times. Very helpful and work harmoniously with others. A role model and absolutely trusted by others."
+      ]
+    },
+    {
+      "code": "creative_analytical",
+      "title": "Creative and Analytical Thinking",
+      "description": "Ability to think broadly & creatively, analyze the \"big picture\" and value diverse perspective. Contribute towards work process enhancement and improvement.",
+      "order": 18,
+      "anchors": [
+        "No imagination & creativity. Does not analyze issues with critical thinking.",
+        "Lacks imagination & creativity. Does not analyze issues sufficiently to understand them.",
+        "Satisfactory in showing creativity and maturity in the thought process. Displays analytical thinking in grasping issues.",
+        "Show good maturity and creativity in the thought process. Open to others' perspectives to gather more data for analysis before forming conclusions. Very analytical in approach.",
+        "Displays a high level of creativity and maturity in the thought process. Highly analytical and very fast in grasping issues. Able to think 'out of the box' and look at all perspectives. Anticipates problems and initiates new and better ways of doing things. Creates value."
+      ]
+    },
+    {
+      "code": "interest_work",
+      "title": "Interest in Work",
+      "description": "Display enthusiasm at work by making suggestions and ideas to improve work processes.",
+      "order": 19,
+      "anchors": [
+        "Has no interest in work, irresponsible and lack of commitment.",
+        "Has little interest in work and generally lacks responsibility and commitment.",
+        "Displays enthusiasm at work and a positive work attitude.",
+        "Show great interest at work.",
+        "Exceptionally energetic at work. Self-motivated with a passion for work and excellence."
+      ]
+    },
+    {
+      "code": "performance_pressure",
+      "title": "Performance Under Pressure",
+      "description": "Work generated under pressure is equally good as work done in normal place, calm and do not show 'panic' under pressure, resulting errors or loss of temper.",
+      "order": 20,
+      "anchors": [
+        "Easily panic and loss temper when work under pressure. The error rate is high and work must be done again.",
+        "Does not work well under pressure and occasionally panic and loss temper. Makes errors in work.",
+        "Usually able to work under pressure without losing temper. Produce quality work without much error.",
+        "Able to work under pressure without losing temper and produce high quality and neat work.",
+        "Consistently works very well under pressure without losing temper, remain calm and maintain the quality standard set."
+      ]
+    },
+    {
+      "code": "integrity",
+      "title": "Integrity",
+      "description": "The expected standards to conduct self and behaviour that is right for the company, customer and community. Trustworthiness.",
+      "order": 21,
+      "anchors": [
+        "Display unsatisfactory conduct and behaviour to the extent of affecting company's image and reputation.",
+        "Occasional complaints are received on the manner and behaviour when dealing with both internal and external customers.",
+        "Can be counted upon to show good conduct and behaviour representing the company.",
+        "Display good conduct, morals and behaviour that do not compromise the good name/image of the company. Can be trusted.",
+        "Displays a high level of conduct and morals. Sets an example by behaving in a manner that is right towards the company, customer & community. A role model and absolutely trusted by others."
+      ]
+    },
+    {
+      "code": "work_organization",
+      "title": "Work Organization",
+      "description": "Ability to organize workload and being systematic and able to reschedule and re-organize workload to cope with additional responsibilities.",
+      "order": 22,
+      "anchors": [
+        "Unable to plan and organize work properly without considerable guidance and support. Have little appreciation for the importance of improving the operating methods and procedure to improve productivity.",
+        "Requires assistant in planning and organizing work. Aware of the needs to improve operating methods and procedures but may not be making enough effort to do so.",
+        "Has ability in planning and organizing work. Makes some effort to improve the operating methods and procedures to improve productivity.",
+        "Process good ability in planning and organizing work. Usually seek improvement in operating methods and procedures to improve productivity whenever he/she can.",
+        "Exceptional ability in planning and organizing work and makes effective use of resources. Constantly seek improvement in operating methods and procedures to improve productivity and inspire others to do the same."
+      ]
+    }
+  ]
+}
