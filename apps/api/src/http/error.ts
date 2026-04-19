@@ -6,7 +6,7 @@ export type ApiError = {
   code: string;
   message: string;
   fields?: Record<string, string>;
-  requestId?: string;
+  requestId: string | undefined;
 };
 
 export function onError(err: unknown, c: Context): Response {
