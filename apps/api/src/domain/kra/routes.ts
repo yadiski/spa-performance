@@ -1,8 +1,10 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
+import { eq } from 'drizzle-orm';
 import { kraCreateBatch, kraApprove, kraReject } from '@spa/shared';
 import { requireAuth } from '../../auth/middleware';
 import { db } from '../../db/client';
+import { kra } from '../../db/schema';
 import { saveKraDraft, submitKras, approveKras, rejectKras } from './service';
 
 export const kraRoutes = new Hono();
@@ -33,4 +35,10 @@ kraRoutes.post('/reject', zValidator('json', kraReject), async (c) => {
   const body = c.req.valid('json');
   const r = await rejectKras(db, actor, body.cycleId, body.note);
   return r.ok ? c.json({ ok: true }) : c.json({ code: r.error, message: r.error }, 409);
+});
+
+kraRoutes.get('/:cycleId', async (c) => {
+  const cycleId = c.req.param('cycleId');
+  const rows = await db.select().from(kra).where(eq(kra.cycleId, cycleId)).orderBy(kra.order);
+  return c.json({ kras: rows });
 });
