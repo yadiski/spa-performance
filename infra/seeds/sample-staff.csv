@@ -1,0 +1,5 @@
+employee_no,email,name,designation,department_code,grade_code,manager_employee_no,hire_date,roles
+E001,ceo@acme.com,Alya CEO,Chief Exec,EXEC,E12,,2015-01-01,hra
+E002,vp@acme.com,Bakar VP,VP Operations,OPS,E11,E001,2017-03-15,appraiser;next_level
+E003,mgr@acme.com,Chong Manager,Manager,IT,E09,E002,2020-06-01,appraiser
+E004,ic@acme.com,Dewi Engineer,Engineer,IT,E07,E003,2022-01-10,staff

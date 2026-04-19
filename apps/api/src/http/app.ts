@@ -7,6 +7,7 @@ import { auth } from '../auth/better-auth';
 import { requireAuth } from '../auth/middleware';
 import { kraRoutes } from '../domain/kra/routes';
 import { cycleRoutes } from '../domain/cycle/routes';
+import { staffRoutes } from '../domain/staff/routes';
 
 const env = loadEnv();
 
@@ -24,3 +25,4 @@ app.get('/api/v1/me', requireAuth, (c) => c.json({ actor: c.get('actor') }));
 
 app.route('/api/v1/kra', kraRoutes);
 app.route('/api/v1/cycle', cycleRoutes);
+app.route('/api/v1/staff', staffRoutes);
