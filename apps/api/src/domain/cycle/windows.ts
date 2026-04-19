@@ -1,4 +1,4 @@
-import type { OpenMidYearWindow } from '@spa/shared';
+import type { OpenMidYearWindow, OpenPmsWindow } from '@spa/shared';
 import type { CycleState } from '@spa/shared';
 import { eq } from 'drizzle-orm';
 import { writeAudit } from '../../audit/log';
@@ -42,6 +42,45 @@ export async function openMidYearWindow(
     await tx.insert(midYearCheckpoint).values({ cycleId: cycle.id }).onConflictDoNothing();
     await writeAudit(tx, {
       eventType: 'mid_year.opened',
+      actorId: actor.userId,
+      actorRole: actor.roles[0] ?? null,
+      targetType: 'cycle',
+      targetId: cycle.id,
+      payload: {},
+      ip: actor.ip,
+      ua: actor.ua,
+    });
+    return { ok: true };
+  });
+}
+
+export async function openPmsWindow(db: DB, actor: Actor, input: OpenPmsWindow): Promise<Result> {
+  return await db.transaction(async (tx) => {
+    const [cycle] = await tx
+      .select()
+      .from(performanceCycle)
+      .where(eq(performanceCycle.id, input.cycleId));
+    if (!cycle) return { ok: false, error: 'cycle_not_found' };
+
+    const v = validate({
+      from: cycle.state as CycleState,
+      action: 'open_pms',
+      actorRoles: actor.roles,
+    });
+    if (!v.ok) return { ok: false, error: v.reason };
+
+    await tx
+      .update(performanceCycle)
+      .set({ state: v.to, updatedAt: new Date() })
+      .where(eq(performanceCycle.id, cycle.id));
+    await tx.insert(approvalTransition).values({
+      cycleId: cycle.id,
+      fromState: cycle.state,
+      toState: v.to,
+      actorId: actor.userId,
+    });
+    await writeAudit(tx, {
+      eventType: 'pms.opened',
       actorId: actor.userId,
       actorRole: actor.roles[0] ?? null,
       targetType: 'cycle',
