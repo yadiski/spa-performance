@@ -18,3 +18,15 @@ cycleRoutes.get('/current', async (c) => {
     .limit(1);
   return c.json({ cycle: row ?? null });
 });
+
+cycleRoutes.get('/for-staff/:staffId', async (c) => {
+  const staffId = c.req.param('staffId');
+  const [row] = await db
+    .select()
+    .from(performanceCycle)
+    .where(eq(performanceCycle.staffId, staffId))
+    .orderBy(desc(performanceCycle.fy))
+    .limit(1);
+  if (!row) return c.json({ cycle: null }, 404);
+  return c.json({ cycle: row });
+});
