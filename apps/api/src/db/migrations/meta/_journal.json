@@ -43,6 +43,13 @@
       "when": 1776616900000,
       "tag": "0005_audit_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776619478733,
+      "tag": "0006_cycle",
+      "breakpoints": true
     }
   ]
 }
