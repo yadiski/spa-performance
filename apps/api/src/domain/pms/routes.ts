@@ -9,6 +9,7 @@ import {
   savePmsComment,
   savePmsKraRatings,
   saveStaffContributions,
+  signPmsComment as signZod,
 } from '@spa/shared';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -23,6 +24,8 @@ import {
   savePmsKraRatings as savePmsKraRatingsSvc,
   saveStaffContributions as saveStaffContributionsSvc,
 } from './service';
+import { verifyPmsSignatureChain } from './signature-verifier';
+import { signPmsComment } from './signing';
 import {
   finalizePms as finalizePmsSvc,
   reopenPms as reopenPmsSvc,
@@ -129,4 +132,22 @@ pmsRoutes.get('/:cycleId/score', async (c) => {
   const { computeScore } = await import('./scoring');
   const breakdown = await computeScore(db, c.req.param('cycleId'));
   return c.json({ breakdown });
+});
+
+pmsRoutes.post('/sign', zValidator('json', signZod), async (c) => {
+  const actor = c.get('actor');
+  const r = await signPmsComment(db, actor, c.req.valid('json'));
+  return r.ok ? c.json({ ok: true }) : c.json({ code: r.error, message: r.error }, 409);
+});
+
+pmsRoutes.get('/:cycleId/verify-signatures', async (c) => {
+  const { pmsAssessment } = await import('../../db/schema');
+  const { eq: eqFn } = await import('drizzle-orm');
+  const [pms] = await db
+    .select()
+    .from(pmsAssessment)
+    .where(eqFn(pmsAssessment.cycleId, c.req.param('cycleId')));
+  if (!pms) return c.json({ ok: false, error: 'pms_not_found' }, 404);
+  const result = await verifyPmsSignatureChain(db, pms.id);
+  return c.json(result);
 });
