@@ -14,13 +14,24 @@ const server = Bun.serve({
     // Proxy /api and /api/auth to the API service.
     if ((url.pathname === '/api' || url.pathname.startsWith('/api/')) && apiOrigin) {
       const forwarded = new URL(url.pathname + url.search, apiOrigin);
+      // Copy headers but drop hop-by-hop and host — the upstream determines its own host.
+      const headers = new Headers();
+      for (const [k, v] of req.headers) {
+        const key = k.toLowerCase();
+        if (key === 'host' || key === 'connection' || key === 'content-length') continue;
+        headers.set(k, v);
+      }
       const init: RequestInit = {
         method: req.method,
-        headers: req.headers,
+        headers,
         body: req.method === 'GET' || req.method === 'HEAD' ? undefined : await req.arrayBuffer(),
-        redirect: 'manual',
       };
-      return fetch(forwarded, init);
+      try {
+        return await fetch(forwarded, init);
+      } catch (err) {
+        console.error('proxy error', forwarded.href, err);
+        return new Response('upstream fetch failed', { status: 502 });
+      }
     }
 
     // Serve static files; fall back to index.html for client-side routing.
