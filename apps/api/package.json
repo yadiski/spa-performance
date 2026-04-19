@@ -12,11 +12,14 @@
   },
   "dependencies": {
     "@spa/shared": "workspace:*",
+    "drizzle-orm": "^0.36.0",
     "hono": "^4.6.11",
+    "postgres": "^3.4.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.28.0"
   }
 }
