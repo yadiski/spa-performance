@@ -7,5 +7,6 @@ build
 .DS_Store
 .superpowers/
 /tmp/
+**/routeTree.gen.ts
 coverage/
 .turbo/
