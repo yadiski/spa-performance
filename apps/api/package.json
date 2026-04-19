@@ -11,6 +11,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.4.1",
     "@spa/shared": "workspace:*",
     "better-auth": "^1.1.4",
     "drizzle-orm": "^0.36.0",

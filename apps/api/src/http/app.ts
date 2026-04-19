@@ -5,6 +5,7 @@ import { onError } from './error';
 import { loadEnv } from '../env';
 import { auth } from '../auth/better-auth';
 import { requireAuth } from '../auth/middleware';
+import { kraRoutes } from '../domain/kra/routes';
 
 const env = loadEnv();
 
@@ -19,3 +20,5 @@ app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));
 app.get('/healthz', (c) => c.json({ status: 'ok' }));
 
 app.get('/api/v1/me', requireAuth, (c) => c.json({ actor: c.get('actor') }));
+
+app.route('/api/v1/kra', kraRoutes);
