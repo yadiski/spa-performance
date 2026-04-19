@@ -19,7 +19,11 @@ export function canonicalJson(value: unknown): string {
 }
 
 export async function sha256(bytes: Uint8Array): Promise<Uint8Array> {
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  // Copy into a fresh ArrayBuffer so the BufferSource type matches (works around
+  // TS lib.dom's exact ArrayBuffer constraint vs Uint8Array<ArrayBufferLike>).
+  const copy = new Uint8Array(bytes.length);
+  copy.set(bytes);
+  const digest = await crypto.subtle.digest('SHA-256', copy.buffer);
   return new Uint8Array(digest);
 }
 
