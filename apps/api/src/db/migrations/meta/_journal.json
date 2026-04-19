@@ -50,6 +50,13 @@
       "when": 1776619478733,
       "tag": "0006_cycle",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1776619659997,
+      "tag": "0007_kra",
+      "breakpoints": true
     }
   ]
 }
