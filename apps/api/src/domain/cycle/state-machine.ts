@@ -8,19 +8,84 @@ export type Transition = {
 };
 
 export const transitions: Transition[] = [
-  { from: CycleState.KraDrafting,         to: CycleState.KraPendingApproval,   action: 'submit_kra',              roles: ['staff'] },
-  { from: CycleState.KraPendingApproval,  to: CycleState.KraApproved,          action: 'approve_kra',             roles: ['appraiser'] },
-  { from: CycleState.KraPendingApproval,  to: CycleState.KraDrafting,          action: 'reject_kra',              roles: ['appraiser'] },
-  { from: CycleState.KraApproved,         to: CycleState.MidYearOpen,          action: 'open_mid_year',           roles: ['hra'] },
-  { from: CycleState.MidYearOpen,         to: CycleState.MidYearSubmitted,     action: 'submit_mid_year',         roles: ['staff'] },
-  { from: CycleState.MidYearSubmitted,    to: CycleState.MidYearDone,          action: 'ack_mid_year',            roles: ['appraiser'] },
-  { from: CycleState.MidYearDone,         to: CycleState.PmsSelfReview,        action: 'open_pms',                roles: ['hra'] },
-  { from: CycleState.PmsSelfReview,       to: CycleState.PmsAwaitingAppraiser, action: 'submit_self_review',      roles: ['staff'] },
-  { from: CycleState.PmsAwaitingAppraiser, to: CycleState.PmsSelfReview,       action: 'return_to_appraisee',     roles: ['appraiser'] },
-  { from: CycleState.PmsAwaitingAppraiser, to: CycleState.PmsAwaitingNextLevel, action: 'submit_appraiser_rating', roles: ['appraiser'] },
-  { from: CycleState.PmsAwaitingNextLevel, to: CycleState.PmsAwaitingAppraiser, action: 'return_to_appraiser',    roles: ['next_level'] },
-  { from: CycleState.PmsAwaitingNextLevel, to: CycleState.PmsAwaitingHra,      action: 'submit_next_level',       roles: ['next_level'] },
-  { from: CycleState.PmsAwaitingHra,      to: CycleState.PmsFinalized,         action: 'finalize',                roles: ['hra'] },
+  {
+    from: CycleState.KraDrafting,
+    to: CycleState.KraPendingApproval,
+    action: 'submit_kra',
+    roles: ['staff'],
+  },
+  {
+    from: CycleState.KraPendingApproval,
+    to: CycleState.KraApproved,
+    action: 'approve_kra',
+    roles: ['appraiser'],
+  },
+  {
+    from: CycleState.KraPendingApproval,
+    to: CycleState.KraDrafting,
+    action: 'reject_kra',
+    roles: ['appraiser'],
+  },
+  {
+    from: CycleState.KraApproved,
+    to: CycleState.MidYearOpen,
+    action: 'open_mid_year',
+    roles: ['hra'],
+  },
+  {
+    from: CycleState.MidYearOpen,
+    to: CycleState.MidYearSubmitted,
+    action: 'submit_mid_year',
+    roles: ['staff'],
+  },
+  {
+    from: CycleState.MidYearSubmitted,
+    to: CycleState.MidYearDone,
+    action: 'ack_mid_year',
+    roles: ['appraiser'],
+  },
+  {
+    from: CycleState.MidYearDone,
+    to: CycleState.PmsSelfReview,
+    action: 'open_pms',
+    roles: ['hra'],
+  },
+  {
+    from: CycleState.PmsSelfReview,
+    to: CycleState.PmsAwaitingAppraiser,
+    action: 'submit_self_review',
+    roles: ['staff'],
+  },
+  {
+    from: CycleState.PmsAwaitingAppraiser,
+    to: CycleState.PmsSelfReview,
+    action: 'return_to_appraisee',
+    roles: ['appraiser'],
+  },
+  {
+    from: CycleState.PmsAwaitingAppraiser,
+    to: CycleState.PmsAwaitingNextLevel,
+    action: 'submit_appraiser_rating',
+    roles: ['appraiser'],
+  },
+  {
+    from: CycleState.PmsAwaitingNextLevel,
+    to: CycleState.PmsAwaitingAppraiser,
+    action: 'return_to_appraiser',
+    roles: ['next_level'],
+  },
+  {
+    from: CycleState.PmsAwaitingNextLevel,
+    to: CycleState.PmsAwaitingHra,
+    action: 'submit_next_level',
+    roles: ['next_level'],
+  },
+  {
+    from: CycleState.PmsAwaitingHra,
+    to: CycleState.PmsFinalized,
+    action: 'finalize',
+    roles: ['hra'],
+  },
 ];
 
 export type ValidateInput = { from: CycleState; action: string; actorRoles: string[] };

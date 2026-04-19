@@ -1,17 +1,20 @@
-import { eq, sql } from 'drizzle-orm';
 import type { KraCreateBatch } from '@spa/shared';
 import { CycleState } from '@spa/shared';
-import type { DB } from '../../db/client';
-import type { Actor } from '../../auth/middleware';
-import { kra, performanceCycle, approvalTransition } from '../../db/schema';
+import { eq, sql } from 'drizzle-orm';
 import { writeAudit } from '../../audit/log';
+import type { Actor } from '../../auth/middleware';
+import type { DB } from '../../db/client';
+import { approvalTransition, kra, performanceCycle } from '../../db/schema';
 import { validate } from '../cycle/state-machine';
 
 type Result = { ok: true } | { ok: false; error: string };
 
 export async function saveKraDraft(db: DB, actor: Actor, input: KraCreateBatch): Promise<Result> {
   return await db.transaction(async (tx) => {
-    const [cycle] = await tx.select().from(performanceCycle).where(eq(performanceCycle.id, input.cycleId));
+    const [cycle] = await tx
+      .select()
+      .from(performanceCycle)
+      .where(eq(performanceCycle.id, input.cycleId));
     if (!cycle) return { ok: false, error: 'cycle_not_found' };
     if (cycle.staffId !== actor.staffId) return { ok: false, error: 'not_owner' };
     if (cycle.state !== CycleState.KraDrafting) return { ok: false, error: 'wrong_state' };
@@ -46,7 +49,10 @@ export async function saveKraDraft(db: DB, actor: Actor, input: KraCreateBatch):
 
 export async function submitKras(db: DB, actor: Actor, cycleId: string): Promise<Result> {
   return await db.transaction(async (tx) => {
-    const [cycle] = await tx.select().from(performanceCycle).where(eq(performanceCycle.id, cycleId));
+    const [cycle] = await tx
+      .select()
+      .from(performanceCycle)
+      .where(eq(performanceCycle.id, cycleId));
     if (!cycle) return { ok: false, error: 'cycle_not_found' };
     if (cycle.staffId !== actor.staffId) return { ok: false, error: 'not_owner' };
 
@@ -103,7 +109,10 @@ async function actorIsManagerOfCycleStaff(
 
 export async function approveKras(db: DB, actor: Actor, cycleId: string): Promise<Result> {
   return await db.transaction(async (tx) => {
-    const [cycle] = await tx.select().from(performanceCycle).where(eq(performanceCycle.id, cycleId));
+    const [cycle] = await tx
+      .select()
+      .from(performanceCycle)
+      .where(eq(performanceCycle.id, cycleId));
     if (!cycle) return { ok: false, error: 'cycle_not_found' };
 
     if (!(await actorIsManagerOfCycleStaff(tx, actor, cycle.staffId))) {
@@ -148,7 +157,10 @@ export async function rejectKras(
   note: string,
 ): Promise<Result> {
   return await db.transaction(async (tx) => {
-    const [cycle] = await tx.select().from(performanceCycle).where(eq(performanceCycle.id, cycleId));
+    const [cycle] = await tx
+      .select()
+      .from(performanceCycle)
+      .where(eq(performanceCycle.id, cycleId));
     if (!cycle) return { ok: false, error: 'cycle_not_found' };
 
     if (!(await actorIsManagerOfCycleStaff(tx, actor, cycle.staffId))) {

@@ -1,9 +1,9 @@
+import type { Role } from '@spa/shared';
+import { sql } from 'drizzle-orm';
 import { createMiddleware } from 'hono/factory';
 import { HTTPException } from 'hono/http-exception';
-import { sql } from 'drizzle-orm';
-import { auth } from './better-auth';
 import { db } from '../db/client';
-import type { Role } from '@spa/shared';
+import { auth } from './better-auth';
 
 export type Actor = {
   userId: string;
@@ -15,7 +15,9 @@ export type Actor = {
 };
 
 declare module 'hono' {
-  interface ContextVariableMap { actor: Actor }
+  interface ContextVariableMap {
+    actor: Actor;
+  }
 }
 
 export const requireAuth = createMiddleware(async (c, next) => {
@@ -26,15 +28,17 @@ export const requireAuth = createMiddleware(async (c, next) => {
     select id as staff_id from staff where user_id = ${session.user.id} limit 1
   `);
   const staffRows = (
-    Array.isArray(staffResult) ? staffResult : (staffResult as { rows?: unknown[] }).rows ?? []
+    Array.isArray(staffResult) ? staffResult : ((staffResult as { rows?: unknown[] }).rows ?? [])
   ) as Array<{ staff_id: string }>;
   const staffId = staffRows[0]?.staff_id ?? null;
 
   let roles: Role[] = [];
   if (staffId) {
-    const rolesResult = await db.execute(sql`select role from staff_role where staff_id = ${staffId}`);
+    const rolesResult = await db.execute(
+      sql`select role from staff_role where staff_id = ${staffId}`,
+    );
     const roleRows = (
-      Array.isArray(rolesResult) ? rolesResult : (rolesResult as { rows?: unknown[] }).rows ?? []
+      Array.isArray(rolesResult) ? rolesResult : ((rolesResult as { rows?: unknown[] }).rows ?? [])
     ) as Array<{ role: Role }>;
     roles = roleRows.map((r) => r.role);
   }

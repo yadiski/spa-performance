@@ -17,7 +17,9 @@ export const cycleStateEnum = pgEnum('cycle_state', [
 
 export const performanceCycle = pgTable('performance_cycle', {
   id: uuid('id').primaryKey().defaultRandom(),
-  staffId: uuid('staff_id').notNull().references(() => staff.id, { onDelete: 'restrict' }),
+  staffId: uuid('staff_id')
+    .notNull()
+    .references(() => staff.id, { onDelete: 'restrict' }),
   fy: integer('fy').notNull(),
   state: cycleStateEnum('state').notNull().default('kra_drafting'),
   kraSetAt: timestamp('kra_set_at', { withTimezone: true }),
@@ -29,7 +31,9 @@ export const performanceCycle = pgTable('performance_cycle', {
 
 export const approvalTransition = pgTable('approval_transition', {
   id: uuid('id').primaryKey().defaultRandom(),
-  cycleId: uuid('cycle_id').notNull().references(() => performanceCycle.id, { onDelete: 'cascade' }),
+  cycleId: uuid('cycle_id')
+    .notNull()
+    .references(() => performanceCycle.id, { onDelete: 'cascade' }),
   fromState: cycleStateEnum('from_state').notNull(),
   toState: cycleStateEnum('to_state').notNull(),
   actorId: uuid('actor_id').notNull(),

@@ -10,7 +10,9 @@ export const perspectiveEnum = pgEnum('kra_perspective', [
 
 export const kra = pgTable('kra', {
   id: uuid('id').primaryKey().defaultRandom(),
-  cycleId: uuid('cycle_id').notNull().references(() => performanceCycle.id, { onDelete: 'cascade' }),
+  cycleId: uuid('cycle_id')
+    .notNull()
+    .references(() => performanceCycle.id, { onDelete: 'cascade' }),
   perspective: perspectiveEnum('perspective').notNull(),
   description: text('description').notNull(),
   weightPct: integer('weight_pct').notNull(),
@@ -24,7 +26,9 @@ export const kra = pgTable('kra', {
 
 export const kraProgressUpdate = pgTable('kra_progress_update', {
   id: uuid('id').primaryKey().defaultRandom(),
-  kraId: uuid('kra_id').notNull().references(() => kra.id, { onDelete: 'cascade' }),
+  kraId: uuid('kra_id')
+    .notNull()
+    .references(() => kra.id, { onDelete: 'cascade' }),
   reportedAt: timestamp('reported_at', { withTimezone: true }).notNull().defaultNow(),
   byRole: text('by_role').notNull(),
   resultAchieved: text('result_achieved').notNull(),

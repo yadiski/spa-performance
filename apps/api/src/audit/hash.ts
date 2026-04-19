@@ -10,7 +10,9 @@ export function canonicalJson(value: unknown): string {
       if (seen.has(v)) throw new Error('cycle');
       seen.add(v);
       const keys = Object.keys(v as object).sort();
-      const parts = keys.map((k) => `${JSON.stringify(k)}:${stringify((v as Record<string, unknown>)[k])}`);
+      const parts = keys.map(
+        (k) => `${JSON.stringify(k)}:${stringify((v as Record<string, unknown>)[k])}`,
+      );
       return `{${parts.join(',')}}`;
     }
     return 'null';
@@ -32,6 +34,9 @@ export function concatBytes(...parts: (Uint8Array | string)[]): Uint8Array {
   const total = bufs.reduce((n, b) => n + b.length, 0);
   const out = new Uint8Array(total);
   let o = 0;
-  for (const b of bufs) { out.set(b, o); o += b.length; }
+  for (const b of bufs) {
+    out.set(b, o);
+    o += b.length;
+  }
   return out;
 }

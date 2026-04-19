@@ -6,7 +6,7 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeAll } from 'bun:test';
+import { beforeAll, describe, expect, it } from 'bun:test';
 import postgres from 'postgres';
 import { app } from '../src/http/app';
 
@@ -24,7 +24,11 @@ describe('auth routes', () => {
     const signUp = await app.request('/api/auth/sign-up/email', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email, password: 'correct-horse-battery-staple-123', name: 'Test User' }),
+      body: JSON.stringify({
+        email,
+        password: 'correct-horse-battery-staple-123',
+        name: 'Test User',
+      }),
     });
     expect(signUp.status).toBe(200);
 

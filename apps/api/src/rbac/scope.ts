@@ -1,7 +1,7 @@
-import { sql, type SQL } from 'drizzle-orm';
+import { type SQL, sql } from 'drizzle-orm';
 import type { Actor } from '../auth/middleware';
-import { transitiveReports } from './hierarchy';
 import type { DB } from '../db/client';
+import { transitiveReports } from './hierarchy';
 
 export type ScopePredicate = SQL;
 

@@ -16,7 +16,9 @@ const schema = z.object({
 });
 export type Env = z.infer<typeof schema>;
 
-export function loadEnv(source: Record<string, string | undefined> = process.env as Record<string, string | undefined>): Env {
+export function loadEnv(
+  source: Record<string, string | undefined> = process.env as Record<string, string | undefined>,
+): Env {
   const result = schema.safeParse(source);
   if (!result.success) {
     const msg = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');

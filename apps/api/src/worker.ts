@@ -1,5 +1,5 @@
-import { boss, startBoss } from './jobs/queue';
 import { runDailyAuditAnchor } from './jobs/daily-audit-anchor';
+import { boss, startBoss } from './jobs/queue';
 
 const QUEUE = 'audit.anchor.daily';
 

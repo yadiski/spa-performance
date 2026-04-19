@@ -1,5 +1,5 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '../../../api/client';
 
@@ -22,15 +22,12 @@ function KraApprove() {
   const cycle = useQuery({
     queryKey: ['cycle', 'for-staff', staffId],
     queryFn: () =>
-      api<{ cycle: { id: string; state: string } | null }>(
-        `/api/v1/cycle/for-staff/${staffId}`,
-      ),
+      api<{ cycle: { id: string; state: string } | null }>(`/api/v1/cycle/for-staff/${staffId}`),
   });
 
   const kras = useQuery({
     queryKey: ['kras', cycle.data?.cycle?.id],
-    queryFn: () =>
-      api<{ kras: KraRow[] }>(`/api/v1/kra/${cycle.data!.cycle!.id}`),
+    queryFn: () => api<{ kras: KraRow[] }>(`/api/v1/kra/${cycle.data!.cycle!.id}`),
     enabled: !!cycle.data?.cycle?.id,
   });
 
@@ -89,12 +86,14 @@ function KraApprove() {
         />
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={() => approve.mutate()}
             className="bg-ink text-white rounded-sm px-3 py-1.5 text-sm"
           >
             Approve
           </button>
           <button
+            type="button"
             onClick={() => reject.mutate()}
             disabled={note.length < 3}
             className="bg-neg text-white rounded-sm px-3 py-1.5 text-sm disabled:opacity-50"

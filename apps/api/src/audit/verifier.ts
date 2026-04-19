@@ -12,7 +12,7 @@ export async function verifyChain(db: DB, fromDate: string, toDate: string): Pro
     order by id asc
   `);
   // drizzle/postgres-js returns an array-like result (not { rows: [...] })
-  const rows = (Array.isArray(res) ? res : (res as { rows?: unknown[] }).rows ?? []) as Array<{
+  const rows = (Array.isArray(res) ? res : ((res as { rows?: unknown[] }).rows ?? [])) as Array<{
     id: bigint;
     ts: Date | string;
     event_type: string;
@@ -25,12 +25,12 @@ export async function verifyChain(db: DB, fromDate: string, toDate: string): Pro
   let prev: Uint8Array | null = null;
   for (const r of rows) {
     // Normalize bytea columns — postgres-js may return Buffer
-    const rowPrevHash = r.prev_hash instanceof Uint8Array
-      ? r.prev_hash
-      : new Uint8Array(r.prev_hash as unknown as ArrayBufferLike);
-    const rowHash = r.hash instanceof Uint8Array
-      ? r.hash
-      : new Uint8Array(r.hash as unknown as ArrayBufferLike);
+    const rowPrevHash =
+      r.prev_hash instanceof Uint8Array
+        ? r.prev_hash
+        : new Uint8Array(r.prev_hash as unknown as ArrayBufferLike);
+    const rowHash =
+      r.hash instanceof Uint8Array ? r.hash : new Uint8Array(r.hash as unknown as ArrayBufferLike);
 
     if (prev && !buffersEqual(prev, rowPrevHash)) return { ok: false, failedId: r.id };
 

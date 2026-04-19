@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  font-feature-settings: 'tnum' 1;
+html,
+body {
+  font-feature-settings: "tnum" 1;
   letter-spacing: -0.005em;
   -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: theme('colors.canvas');
-  color: theme('colors.ink.DEFAULT');
+  background: theme("colors.canvas");
+  color: theme("colors.ink.DEFAULT");
 }

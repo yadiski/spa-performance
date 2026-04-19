@@ -15,13 +15,14 @@ export const kraDraft = z.object({
 });
 export type KraDraft = z.infer<typeof kraDraft>;
 
-export const kraCreateBatch = z.object({
-  cycleId: z.string().uuid(),
-  kras: z.array(kraDraft).min(3).max(5),
-}).refine(
-  (v) => v.kras.reduce((s, k) => s + k.weightPct, 0) === 100,
-  { message: 'KRA weights must total 100%' },
-);
+export const kraCreateBatch = z
+  .object({
+    cycleId: z.string().uuid(),
+    kras: z.array(kraDraft).min(3).max(5),
+  })
+  .refine((v) => v.kras.reduce((s, k) => s + k.weightPct, 0) === 100, {
+    message: 'KRA weights must total 100%',
+  });
 export type KraCreateBatch = z.infer<typeof kraCreateBatch>;
 
 export const kraApprove = z.object({

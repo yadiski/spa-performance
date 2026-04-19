@@ -1,5 +1,5 @@
-import { app } from './http/app';
 import { loadEnv } from './env';
+import { app } from './http/app';
 
 const env = loadEnv();
 // Railway injects PORT; prefer it so we match whatever the edge router expects.

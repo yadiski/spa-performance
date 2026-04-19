@@ -38,7 +38,7 @@ const server = Bun.serve({
     const candidate = url.pathname === '/' ? '/index.html' : url.pathname;
     const file = Bun.file(dist + candidate);
     if (await file.exists()) return new Response(file);
-    return new Response(Bun.file(dist + '/index.html'));
+    return new Response(Bun.file(`${dist}/index.html`));
   },
 });
 

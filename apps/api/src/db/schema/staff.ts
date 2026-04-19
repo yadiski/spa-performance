@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, uuid, date } from 'drizzle-orm/pg-core';
+import { date, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { user } from './auth';
 import { department, grade, organization } from './org';
 
@@ -14,13 +14,23 @@ export const roleEnum = pgEnum('role', [
 
 export const staff = pgTable('staff', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().references(() => user.id, { onDelete: 'restrict' }).unique(),
-  orgId: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'restrict' })
+    .unique(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organization.id, { onDelete: 'restrict' }),
   employeeNo: text('employee_no').notNull().unique(),
   name: text('name').notNull(),
   designation: text('designation').notNull(),
-  departmentId: uuid('department_id').notNull().references(() => department.id),
-  gradeId: uuid('grade_id').notNull().references(() => grade.id),
+  departmentId: uuid('department_id')
+    .notNull()
+    .references(() => department.id),
+  gradeId: uuid('grade_id')
+    .notNull()
+    .references(() => grade.id),
+  // biome-ignore lint/suspicious/noExplicitAny: drizzle self-reference requires any cast
   managerId: uuid('manager_id').references((): any => staff.id),
   hireDate: date('hire_date').notNull(),
   terminatedAt: timestamp('terminated_at', { withTimezone: true }),
@@ -30,7 +40,9 @@ export const staff = pgTable('staff', {
 
 export const staffRole = pgTable('staff_role', {
   id: uuid('id').primaryKey().defaultRandom(),
-  staffId: uuid('staff_id').notNull().references(() => staff.id, { onDelete: 'cascade' }),
+  staffId: uuid('staff_id')
+    .notNull()
+    .references(() => staff.id, { onDelete: 'cascade' }),
   role: roleEnum('role').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });

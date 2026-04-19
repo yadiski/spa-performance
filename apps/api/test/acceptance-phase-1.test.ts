@@ -5,14 +5,14 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
+import { KraPerspective } from '@spa/shared';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
-import { app } from '../src/http/app';
+import { verifyChain } from '../src/audit/verifier';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
-import { verifyChain } from '../src/audit/verifier';
-import { KraPerspective } from '@spa/shared';
+import { app } from '../src/http/app';
 
 async function signUp(email: string, name: string, password: string): Promise<void> {
   const res = await app.request('/api/auth/sign-up/email', {
@@ -79,43 +79,62 @@ describe('phase 1 acceptance', () => {
     await signUp(staffEmail, 'Staff Person', pw);
 
     const mgrUserResult = await db.execute(sql`select id from "user" where email = ${mgrEmail}`);
-    const mgrUserRows = (Array.isArray(mgrUserResult) ? mgrUserResult : (mgrUserResult as { rows?: unknown[] }).rows ?? []) as Array<{ id: string }>;
-    const staffUserResult = await db.execute(sql`select id from "user" where email = ${staffEmail}`);
-    const staffUserRows = (Array.isArray(staffUserResult) ? staffUserResult : (staffUserResult as { rows?: unknown[] }).rows ?? []) as Array<{ id: string }>;
+    const mgrUserRows = (
+      Array.isArray(mgrUserResult)
+        ? mgrUserResult
+        : ((mgrUserResult as { rows?: unknown[] }).rows ?? [])
+    ) as Array<{ id: string }>;
+    const staffUserResult = await db.execute(
+      sql`select id from "user" where email = ${staffEmail}`,
+    );
+    const staffUserRows = (
+      Array.isArray(staffUserResult)
+        ? staffUserResult
+        : ((staffUserResult as { rows?: unknown[] }).rows ?? [])
+    ) as Array<{ id: string }>;
 
-    const [mgrStaff] = await db.insert(s.staff).values({
-      userId: mgrUserRows[0]!.id,
-      orgId: org!.id,
-      employeeNo: 'E100',
-      name: 'Manager Person',
-      designation: 'Manager',
-      departmentId: dept!.id,
-      gradeId: grade!.id,
-      managerId: null,
-      hireDate: '2020-01-01',
-    }).returning();
-    const [staffRec] = await db.insert(s.staff).values({
-      userId: staffUserRows[0]!.id,
-      orgId: org!.id,
-      employeeNo: 'E101',
-      name: 'Staff Person',
-      designation: 'Engineer',
-      departmentId: dept!.id,
-      gradeId: grade!.id,
-      managerId: mgrStaff!.id,
-      hireDate: '2022-01-01',
-    }).returning();
+    const [mgrStaff] = await db
+      .insert(s.staff)
+      .values({
+        userId: mgrUserRows[0]!.id,
+        orgId: org!.id,
+        employeeNo: 'E100',
+        name: 'Manager Person',
+        designation: 'Manager',
+        departmentId: dept!.id,
+        gradeId: grade!.id,
+        managerId: null,
+        hireDate: '2020-01-01',
+      })
+      .returning();
+    const [staffRec] = await db
+      .insert(s.staff)
+      .values({
+        userId: staffUserRows[0]!.id,
+        orgId: org!.id,
+        employeeNo: 'E101',
+        name: 'Staff Person',
+        designation: 'Engineer',
+        departmentId: dept!.id,
+        gradeId: grade!.id,
+        managerId: mgrStaff!.id,
+        hireDate: '2022-01-01',
+      })
+      .returning();
 
     await db.insert(s.staffRole).values([
       { staffId: mgrStaff!.id, role: 'appraiser' },
       { staffId: staffRec!.id, role: 'staff' },
     ]);
 
-    const [cycle] = await db.insert(s.performanceCycle).values({
-      staffId: staffRec!.id,
-      fy: 2026,
-      state: 'kra_drafting',
-    }).returning();
+    const [cycle] = await db
+      .insert(s.performanceCycle)
+      .values({
+        staffId: staffRec!.id,
+        fy: 2026,
+        state: 'kra_drafting',
+      })
+      .returning();
 
     const staffCookie = await signIn(staffEmail, pw);
     const kras = [0, 1, 2, 3].map((i) => ({
@@ -158,7 +177,9 @@ describe('phase 1 acceptance', () => {
       where target_id = ${cycle!.id}
       order by id asc
     `);
-    const auditRows = (Array.isArray(auditResult) ? auditResult : (auditResult as { rows?: unknown[] }).rows ?? []) as Array<{ event_type: string }>;
+    const auditRows = (
+      Array.isArray(auditResult) ? auditResult : ((auditResult as { rows?: unknown[] }).rows ?? [])
+    ) as Array<{ event_type: string }>;
     const events = auditRows.map((r) => r.event_type);
     expect(events).toEqual(['kra.drafted', 'kra.submitted', 'kra.approved']);
 
@@ -185,42 +206,61 @@ describe('phase 1 acceptance', () => {
     await signUp(staffEmail, 'Staff Two', pw);
 
     const mgrUserResult = await db.execute(sql`select id from "user" where email = ${mgrEmail}`);
-    const mgrUserRows = (Array.isArray(mgrUserResult) ? mgrUserResult : (mgrUserResult as { rows?: unknown[] }).rows ?? []) as Array<{ id: string }>;
-    const staffUserResult = await db.execute(sql`select id from "user" where email = ${staffEmail}`);
-    const staffUserRows = (Array.isArray(staffUserResult) ? staffUserResult : (staffUserResult as { rows?: unknown[] }).rows ?? []) as Array<{ id: string }>;
+    const mgrUserRows = (
+      Array.isArray(mgrUserResult)
+        ? mgrUserResult
+        : ((mgrUserResult as { rows?: unknown[] }).rows ?? [])
+    ) as Array<{ id: string }>;
+    const staffUserResult = await db.execute(
+      sql`select id from "user" where email = ${staffEmail}`,
+    );
+    const staffUserRows = (
+      Array.isArray(staffUserResult)
+        ? staffUserResult
+        : ((staffUserResult as { rows?: unknown[] }).rows ?? [])
+    ) as Array<{ id: string }>;
 
-    const [mgrStaff] = await db.insert(s.staff).values({
-      userId: mgrUserRows[0]!.id,
-      orgId: org!.id,
-      employeeNo: 'E200',
-      name: 'Mgr Two',
-      designation: 'Manager',
-      departmentId: dept!.id,
-      gradeId: grade!.id,
-      managerId: null,
-      hireDate: '2020-01-01',
-    }).returning();
-    const [staffRec] = await db.insert(s.staff).values({
-      userId: staffUserRows[0]!.id,
-      orgId: org!.id,
-      employeeNo: 'E201',
-      name: 'Staff Two',
-      designation: 'Analyst',
-      departmentId: dept!.id,
-      gradeId: grade!.id,
-      managerId: mgrStaff!.id,
-      hireDate: '2022-01-01',
-    }).returning();
+    const [mgrStaff] = await db
+      .insert(s.staff)
+      .values({
+        userId: mgrUserRows[0]!.id,
+        orgId: org!.id,
+        employeeNo: 'E200',
+        name: 'Mgr Two',
+        designation: 'Manager',
+        departmentId: dept!.id,
+        gradeId: grade!.id,
+        managerId: null,
+        hireDate: '2020-01-01',
+      })
+      .returning();
+    const [staffRec] = await db
+      .insert(s.staff)
+      .values({
+        userId: staffUserRows[0]!.id,
+        orgId: org!.id,
+        employeeNo: 'E201',
+        name: 'Staff Two',
+        designation: 'Analyst',
+        departmentId: dept!.id,
+        gradeId: grade!.id,
+        managerId: mgrStaff!.id,
+        hireDate: '2022-01-01',
+      })
+      .returning();
     await db.insert(s.staffRole).values([
       { staffId: mgrStaff!.id, role: 'appraiser' },
       { staffId: staffRec!.id, role: 'staff' },
     ]);
 
-    const [cycle] = await db.insert(s.performanceCycle).values({
-      staffId: staffRec!.id,
-      fy: 2026,
-      state: 'kra_drafting',
-    }).returning();
+    const [cycle] = await db
+      .insert(s.performanceCycle)
+      .values({
+        staffId: staffRec!.id,
+        fy: 2026,
+        state: 'kra_drafting',
+      })
+      .returning();
 
     const staffCookie = await signIn(staffEmail, pw);
     await postAs(staffCookie, '/api/v1/kra/draft', {
@@ -255,7 +295,11 @@ describe('phase 1 acceptance', () => {
       where cycle_id = ${cycle!.id}
       order by at asc
     `);
-    const transitions = (Array.isArray(transitionsResult) ? transitionsResult : (transitionsResult as { rows?: unknown[] }).rows ?? []) as Array<{
+    const transitions = (
+      Array.isArray(transitionsResult)
+        ? transitionsResult
+        : ((transitionsResult as { rows?: unknown[] }).rows ?? [])
+    ) as Array<{
       from_state: string;
       to_state: string;
       note: string | null;

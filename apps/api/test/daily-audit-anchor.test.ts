@@ -5,11 +5,11 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
-import { db } from '../src/db/client';
 import { writeAudit } from '../src/audit/log';
+import { db } from '../src/db/client';
 import { runDailyAuditAnchor } from '../src/jobs/daily-audit-anchor';
 
 describe('runDailyAuditAnchor', () => {
@@ -24,8 +24,13 @@ describe('runDailyAuditAnchor', () => {
     await db.transaction(async (tx) => {
       await writeAudit(tx, {
         eventType: 'anchor.test',
-        actorId: null, actorRole: null, targetType: null, targetId: null,
-        payload: {}, ip: null, ua: null,
+        actorId: null,
+        actorRole: null,
+        targetType: null,
+        targetId: null,
+        payload: {},
+        ip: null,
+        ua: null,
       });
     });
     const today = new Date().toISOString().slice(0, 10);
@@ -33,7 +38,7 @@ describe('runDailyAuditAnchor', () => {
     const res = await db.execute(sql`
       select date::text as date, root_hash from audit_anchor where date = ${today}::date
     `);
-    const rows = Array.isArray(res) ? res : (res as any).rows;
+    const rows = Array.isArray(res) ? res : (res as { rows?: unknown[] }).rows;
     const row = (rows as Array<{ date: string; root_hash: Uint8Array | Buffer }>)[0];
     expect(row?.date).toBe(today);
     const hash = row?.root_hash;

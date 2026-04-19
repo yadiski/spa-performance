@@ -20,8 +20,14 @@ export function onError(err: unknown, c: Context): Response {
   if (err instanceof ZodError) {
     const fields: Record<string, string> = {};
     for (const issue of err.issues) fields[issue.path.join('.')] = issue.message;
-    return c.json<ApiError>({ code: 'validation_error', message: 'Validation failed', fields, requestId }, 400);
+    return c.json<ApiError>(
+      { code: 'validation_error', message: 'Validation failed', fields, requestId },
+      400,
+    );
   }
   console.error('unhandled error', err);
-  return c.json<ApiError>({ code: 'internal_error', message: 'Internal server error', requestId }, 500);
+  return c.json<ApiError>(
+    { code: 'internal_error', message: 'Internal server error', requestId },
+    500,
+  );
 }

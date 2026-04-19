@@ -5,10 +5,10 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
+import { readFileSync } from 'node:fs';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
-import { readFileSync } from 'node:fs';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
 import { importStaffCsv } from '../src/domain/staff/import';
@@ -58,7 +58,8 @@ describe('importStaffCsv', () => {
     const roles = await db.select().from(s.staffRole);
     const byStaff: Record<string, string[]> = {};
     for (const r of roles) {
-      (byStaff[r.staffId] ??= []).push(r.role);
+      if (!byStaff[r.staffId]) byStaff[r.staffId] = [];
+      byStaff[r.staffId]!.push(r.role);
     }
     expect(byStaff[byEmp.E001!.id]?.sort()).toEqual(['hra']);
     expect(byStaff[byEmp.E002!.id]?.sort()).toEqual(['appraiser', 'next_level']);

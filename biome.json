@@ -12,13 +12,41 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "style": { "useImportType": "error" },
+      "style": {
+        "useImportType": "error",
+        "noNonNullAssertion": "off"
+      },
       "suspicious": { "noExplicitAny": "error" },
       "correctness": { "useExhaustiveDependencies": "error" }
     }
   },
+  "css": {
+    "linter": {
+      "enabled": true
+    },
+    "formatter": { "enabled": true }
+  },
   "javascript": {
     "formatter": { "quoteStyle": "single", "semicolons": "always", "trailingCommas": "all" }
   },
-  "files": { "ignore": ["dist", "build", "node_modules", "**/drizzle/**"] }
+  "overrides": [
+    {
+      "include": ["**/*.css"],
+      "linter": {
+        "rules": {
+          "correctness": { "noUnknownFunction": "off" }
+        }
+      }
+    }
+  ],
+  "files": {
+    "ignore": [
+      "dist",
+      "build",
+      "node_modules",
+      "**/drizzle/**",
+      "**/routeTree.gen.ts",
+      "apps/api/src/db/migrations/**"
+    ]
+  }
 }

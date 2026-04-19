@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { type KraDraft, KraPerspective, kraCreateBatch } from '@spa/shared';
 import { useForm } from '@tanstack/react-form';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { kraCreateBatch, KraPerspective, type KraDraft } from '@spa/shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
 import { api } from '../../../api/client';
 
 export const Route = createFileRoute('/_app/me/kra')({ component: KraForm });
@@ -31,8 +31,7 @@ function KraForm() {
   });
 
   const submit = useMutation({
-    mutationFn: (cycleId: string) =>
-      api(`/api/v1/kra/submit/${cycleId}`, { method: 'POST' }),
+    mutationFn: (cycleId: string) => api(`/api/v1/kra/submit/${cycleId}`, { method: 'POST' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycle'] }),
   });
 
@@ -70,14 +69,20 @@ function KraForm() {
           {(field) => (
             <div className="space-y-4">
               {field.state.value.map((_k, i) => (
-                <div key={i} className="bg-surface border border-hairline rounded-md p-5 space-y-3">
+                <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: KRAs are fixed-position (3-5 slots), index is stable
+                  key={i}
+                  className="bg-surface border border-hairline rounded-md p-5 space-y-3"
+                >
                   <div className="flex items-center gap-4">
                     <span className="text-xs uppercase tracking-wider text-ink-2">KRA {i + 1}</span>
                     <form.Field name={`kras[${i}].perspective`}>
                       {(f) => (
                         <select
                           value={f.state.value}
-                          onChange={(e) => f.handleChange(e.target.value as KraDraft['perspective'])}
+                          onChange={(e) =>
+                            f.handleChange(e.target.value as KraDraft['perspective'])
+                          }
                           className="text-sm border border-hairline rounded-sm px-2 py-1 bg-surface"
                         >
                           {Object.values(KraPerspective).map((p) => (
