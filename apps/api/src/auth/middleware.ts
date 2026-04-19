@@ -22,16 +22,21 @@ export const requireAuth = createMiddleware(async (c, next) => {
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session) throw new HTTPException(401, { message: 'unauthenticated' });
 
-  const { rows: staffRows } = await db.execute(sql`
+  const staffResult = await db.execute(sql`
     select id as staff_id from staff where user_id = ${session.user.id} limit 1
   `);
-  const staffRow = (staffRows as Array<{ staff_id: string }>)[0];
-  const staffId = staffRow?.staff_id ?? null;
+  const staffRows = (
+    Array.isArray(staffResult) ? staffResult : (staffResult as { rows?: unknown[] }).rows ?? []
+  ) as Array<{ staff_id: string }>;
+  const staffId = staffRows[0]?.staff_id ?? null;
 
   let roles: Role[] = [];
   if (staffId) {
-    const { rows } = await db.execute(sql`select role from staff_role where staff_id = ${staffId}`);
-    roles = (rows as Array<{ role: Role }>).map((r) => r.role);
+    const rolesResult = await db.execute(sql`select role from staff_role where staff_id = ${staffId}`);
+    const roleRows = (
+      Array.isArray(rolesResult) ? rolesResult : (rolesResult as { rows?: unknown[] }).rows ?? []
+    ) as Array<{ role: Role }>;
+    roles = roleRows.map((r) => r.role);
   }
 
   c.set('actor', {
