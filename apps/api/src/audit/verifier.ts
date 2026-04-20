@@ -5,10 +5,13 @@ import { canonicalJson, concatBytes, sha256 } from './hash';
 export type VerifyResult = { ok: true } | { ok: false; failedId: bigint };
 
 export async function verifyChain(db: DB, fromDate: string, toDate: string): Promise<VerifyResult> {
+  // Anchor the date bounds in UTC so the caller's ISO date slices align with
+  // how ts is stored, regardless of the Postgres session TZ.
   const res = await db.execute(sql`
     select id, ts, event_type, actor_id, payload, prev_hash, hash
     from audit_log
-    where ts::date between ${fromDate}::date and ${toDate}::date
+    where ts >= (${fromDate} || ' 00:00:00+00')::timestamptz
+      and ts <  (${toDate}   || ' 00:00:00+00')::timestamptz + interval '1 day'
     order by id asc
   `);
   // drizzle/postgres-js returns an array-like result (not { rows: [...] })

@@ -169,6 +169,70 @@ export function renderEmail(kind: NotificationKind, ctx: TemplateContext): Rende
       return { subject, text, html };
     }
 
+    case NotificationKind.InviteUser: {
+      // ctx.inviteUrl is the primary link; ctx.link is the generic fallback used by the test suite
+      const inviteUrl =
+        typeof ctx.inviteUrl === 'string'
+          ? ctx.inviteUrl
+          : typeof ctx.link === 'string'
+            ? ctx.link
+            : '#';
+      const subject = "You're invited to the performance platform";
+      const text = `You have been invited to join the performance management platform. Click the link below to set up your account (expires in 7 days):\n\n${inviteUrl}\n\nIf you did not expect this invitation, please ignore this email.`;
+      const html = baseHtml(
+        `<p>You have been invited to join the performance management platform.</p><p>Click the link below to set up your account (link expires in 7 days):</p><p><a href="${inviteUrl}" style="color:#4f46e5">Accept invitation &amp; set password</a></p><p style="font-size:12px;color:#888">If you did not expect this invitation, please ignore this email.</p>`,
+      );
+      return { subject, text, html };
+    }
+
+    case NotificationKind.WelcomeUser: {
+      const helpUrl =
+        typeof ctx.helpUrl === 'string'
+          ? ctx.helpUrl
+          : typeof ctx.link === 'string'
+            ? ctx.link
+            : '/help';
+      const recipientName = typeof ctx.name === 'string' ? ctx.name : 'there';
+      const subject = 'Welcome to the performance platform';
+      const text = `Hi ${recipientName},\n\nWelcome to the performance management platform. Here is a quick-start guide to help you get started:\n\n${helpUrl}\n\nIf you need immediate help, please contact HR.`;
+      const html = baseHtml(
+        `<p>Hi <strong>${recipientName}</strong>,</p><p>Welcome to the performance management platform.</p><p>Here's a quick-start guide to help you get started:</p><p><a href="${helpUrl}" style="color:#4f46e5">View Quickstart Guide</a></p><p>If you need immediate help, please contact HR.</p>`,
+      );
+      return { subject, text, html };
+    }
+
+    case NotificationKind.PasswordReset: {
+      const resetUrl =
+        typeof ctx.resetUrl === 'string'
+          ? ctx.resetUrl
+          : typeof ctx.link === 'string'
+            ? ctx.link
+            : '#';
+      const subject = 'Password reset request';
+      const text = `A password reset was requested for your account. Click the link below to set a new password (expires in 1 hour):\n\n${resetUrl}\n\nIf you did not request this, please ignore this email. Your password will remain unchanged.`;
+      const html = baseHtml(
+        `<p>A password reset was requested for your account.</p><p>Click the link below to set a new password (link expires in 1 hour):</p><p><a href="${resetUrl}" style="color:#4f46e5">Reset password</a></p><p style="font-size:12px;color:#888">If you did not request this, please ignore this email. Your password will remain unchanged.</p>`,
+      );
+      return { subject, text, html };
+    }
+
+    case NotificationKind.AccessReviewGenerated: {
+      const reviewUrl =
+        typeof ctx.reviewUrl === 'string'
+          ? ctx.reviewUrl
+          : typeof ctx.link === 'string'
+            ? ctx.link
+            : '/admin/access-review';
+      const itemCount = typeof ctx.itemCount === 'number' ? ctx.itemCount : 0;
+      const periodLabel = typeof ctx.periodLabel === 'string' ? ctx.periodLabel : 'this quarter';
+      const subject = `Quarterly access review — ${periodLabel}`;
+      const text = `The quarterly access review for ${periodLabel} has been generated with ${itemCount} user(s) to review.\n\nPlease log in and complete the review within 30 days:\n\n${reviewUrl}`;
+      const html = baseHtml(
+        `<p>The quarterly access review for <strong>${periodLabel}</strong> has been generated.</p><p>There are <strong>${itemCount}</strong> user(s) to review.</p><p>Please complete the review within <strong>30 days</strong>.</p><p><a href="${reviewUrl}" style="color:#4f46e5">Go to Access Review</a></p>`,
+      );
+      return { subject, text, html };
+    }
+
     default: {
       // Exhaustiveness check — caught at compile time if a new kind is added without a case.
       const _exhaustive: never = kind;
