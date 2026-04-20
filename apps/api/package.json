@@ -12,17 +12,20 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.1",
+    "@react-pdf/renderer": "^4.5.1",
     "@spa/shared": "workspace:*",
     "better-auth": "^1.1.4",
     "drizzle-orm": "^0.36.0",
     "hono": "^4.6.11",
     "pg-boss": "^10.1.5",
     "postgres": "^3.4.5",
+    "react": "^19.2.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
     "@types/bun": "latest",
-    "drizzle-kit": "^0.28.0"
+    "@types/react": "^19.2.14",
+    "drizzle-kit": "^0.28.0",
+    "typescript": "^5.6.3"
   }
 }
