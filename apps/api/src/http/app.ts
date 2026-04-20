@@ -12,6 +12,7 @@ import { notificationRoutes } from '../domain/notifications/routes';
 import { pmsRoutes } from '../domain/pms/routes';
 import { staffRoutes } from '../domain/staff/routes';
 import { loadEnv } from '../env';
+import { searchRoutes } from '../search/routes';
 import { onError } from './error';
 
 const env = loadEnv();
@@ -36,3 +37,4 @@ app.route('/api/v1/pms', pmsRoutes);
 app.route('/api/v1/notifications', notificationRoutes);
 app.route('/api/v1/ai', aiRoutes);
 app.route('/api/v1/dashboards', dashboardRoutes);
+app.route('/api/v1/search', searchRoutes);

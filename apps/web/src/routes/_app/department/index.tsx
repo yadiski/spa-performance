@@ -2,8 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { dashboardsApi } from '../../../api/dashboards';
+import type { StaffSearchHit } from '../../../api/search';
 import { DistributionHistogram } from '../../../components/dashboard/DistributionHistogram';
 import { StatCard } from '../../../components/dashboard/StatCard';
+import { StaffSearchCombobox } from '../../../components/search/StaffSearchCombobox';
 
 export const Route = createFileRoute('/_app/department/')({
   component: DepartmentDashboard,
@@ -11,6 +13,7 @@ export const Route = createFileRoute('/_app/department/')({
 
 function DepartmentDashboard() {
   const [search, setSearch] = useState('');
+  const [selectedStaff, setSelectedStaff] = useState<StaffSearchHit | null>(null);
 
   const q = useQuery({
     queryKey: ['dashboards', 'dept'],
@@ -34,10 +37,12 @@ function DepartmentDashboard() {
 
   const { department, rollup, distribution, cycles } = data;
 
-  // Client-side filter by staff name
-  const filteredCycles = search.trim()
-    ? cycles.filter((c) => c.staffName.toLowerCase().includes(search.trim().toLowerCase()))
-    : cycles;
+  // Client-side filter — prefer selected staff from combobox, fallback to text search
+  const filteredCycles = selectedStaff
+    ? cycles.filter((c) => c.staffName === selectedStaff.name)
+    : search.trim()
+      ? cycles.filter((c) => c.staffName.toLowerCase().includes(search.trim().toLowerCase()))
+      : cycles;
 
   return (
     <div className="max-w-4xl space-y-8">
@@ -76,13 +81,16 @@ function DepartmentDashboard() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-ink">Cycles</h2>
-          <input
-            type="search"
-            placeholder="Search by name…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="text-sm border border-hairline rounded-sm px-3 py-1.5 bg-surface w-52"
-          />
+          <div className="w-64">
+            <StaffSearchCombobox
+              scope="dept"
+              placeholder="Search by name…"
+              onSelect={(staff) => {
+                setSelectedStaff(staff);
+                setSearch('');
+              }}
+            />
+          </div>
         </div>
 
         {filteredCycles.length === 0 ? (
