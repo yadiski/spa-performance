@@ -7,8 +7,9 @@ Monorepo for Payong-Legam's performance management system. Bun workspaces, Hono 
 - **Phase 1 (foundation):** complete. Auth, org/staff import, cycle state machine, KRA workflow, audit log chain, daily anchor job.
 - **Phase 2 (PMS workflow):** complete. Tag `phase-2-alpha`. Mid-year checkpoint, full PMS form (Parts I–VI with 22 behavioural rubrics), e-signature chain, React-PDF generation + R2 upload, notification fan-out (in-app + email via Resend), HR cycle control, end-to-end acceptance test.
 - **Phase 3 (AI + dashboards):** complete. Tag `phase-3-alpha`. OpenRouter-backed dispatcher (cache / budget / advisory-lock stampede guard / audit), five AI features (staff summary, KRA quality, dev recommendations, calibration, mid-year nudges), role-scoped dashboards over materialized views, trigram staff search, XLSX org-wide export via pg-boss + R2, plus scoping / prompt-injection / budget red-team + acceptance suites.
+- **Phase 4 (hardening + cutover prep):** complete. Tag `phase-4-alpha`. Audit archive (jsonl.gz to R2 with append-only escape hatch) + verify endpoint + anchor alert. Access control: lockout, session timeout, IT-admin impersonation, password policy + HIBP lookup, MFA recovery codes. Security headers (HSTS, CSP, Permissions-Policy), per-route rate limits, strict CORS, force-https. Retention jobs (auth, exports, ai-cache, performance archival, terminated-staff anonymization). Structured JSON logger + request-id + pluggable error client. Bulk staff import with staging + validation + 24h revert. Invite flow, password reset, first-login checklist, quarterly access review with revoke. Runbooks for staging clone, cutover, rollback, rehearsals, first-week support, incident response, restore drill, bulk import, CSP hardening, TLS, daily snapshot, uptime probe, access review. Operator + end-user docs, API reference, ISO 27001 posture mapping.
 
-See `docs/superpowers/plans/` for the per-phase plan documents and exit checklists.
+See `docs/superpowers/plans/` for the per-phase plan documents and exit checklists. Operator and user docs live under `docs/`, runbooks under `infra/runbooks/`.
 
 ## What Phase 2 shipped
 
