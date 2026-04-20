@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { aiApi } from '../../../api/ai';
 import { api } from '../../../api/client';
 import { pmsApi } from '../../../api/pms';
 import { StepperForm, type StepperStep } from '../../../components/StepperForm';
+import { AiPanel } from '../../../components/ai/AiPanel';
 
 export const Route = createFileRoute('/_app/me/cycle/$cycleId/review')({
   component: StaffSelfReview,
@@ -219,6 +221,55 @@ function StaffSelfReview() {
     return (
       <div className="p-8 max-w-2xl space-y-4">
         <h1 className="text-lg font-semibold">Self-review — FY {state.cycle.fy}</h1>
+        {cycleState === 'pms_finalized' && (
+          <AiPanel
+            title="Performance Summary"
+            queryKey={['ai', 'staff-summary', cycleId]}
+            queryFn={() => aiApi.staffSummary(cycleId).then((r) => r.output)}
+          >
+            {(output) => (
+              <div className="space-y-3 text-sm">
+                {output.highlights.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                      Highlights
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                      {output.highlights.map((h, i) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                        <li key={i}>{h}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {output.concerns.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">Concerns</div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                      {output.concerns.map((c, i) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {output.focus_areas.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                      Focus areas
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                      {output.focus_areas.map((f, i) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                        <li key={i}>{f}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </AiPanel>
+        )}
         <div className="bg-surface border border-hairline rounded-md p-4 text-sm text-ink-2">
           This cycle is currently in state{' '}
           <span className="font-medium text-ink">{cycleState}</span>. Self-review editing is closed.
