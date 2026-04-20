@@ -12,6 +12,7 @@ import { notificationRoutes } from '../domain/notifications/routes';
 import { pmsRoutes } from '../domain/pms/routes';
 import { staffRoutes } from '../domain/staff/routes';
 import { loadEnv } from '../env';
+import { exportRoutes } from '../exports/routes';
 import { searchRoutes } from '../search/routes';
 import { onError } from './error';
 
@@ -38,3 +39,4 @@ app.route('/api/v1/notifications', notificationRoutes);
 app.route('/api/v1/ai', aiRoutes);
 app.route('/api/v1/dashboards', dashboardRoutes);
 app.route('/api/v1/search', searchRoutes);
+app.route('/api/v1/exports', exportRoutes);

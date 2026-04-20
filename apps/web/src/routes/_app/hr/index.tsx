@@ -177,6 +177,16 @@ function HrIndex() {
               override support.
             </div>
           </Link>
+
+          <Link
+            to="/hr/exports"
+            className="block bg-surface border border-hairline rounded-md p-5 hover:border-ink/30 transition-colors group"
+          >
+            <div className="text-sm font-medium text-ink group-hover:underline">Exports</div>
+            <div className="text-xs text-ink-2 mt-1">
+              Generate and download org-wide PMS snapshots as Excel workbooks.
+            </div>
+          </Link>
         </div>
       </div>
     </div>

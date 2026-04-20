@@ -131,6 +131,17 @@ export function renderEmail(kind: NotificationKind, ctx: TemplateContext): Rende
       return { subject, text, html };
     }
 
+    case NotificationKind.ExportReady: {
+      const downloadPath = typeof ctx.downloadPath === 'string' ? ctx.downloadPath : '/hr/exports';
+      const fullLink = typeof ctx.link === 'string' ? ctx.link : downloadPath;
+      const subject = 'Your export is ready to download';
+      const text = `Your PMS export is ready. Download it here: ${fullLink}`;
+      const html = baseHtml(
+        `<p>Your PMS org snapshot export is ready.</p><p><a href="${fullLink}" style="color:#4f46e5">Download the export</a></p>`,
+      );
+      return { subject, text, html };
+    }
+
     case NotificationKind.PmsReopened: {
       const subject = 'Your performance review has been reopened';
       const reopenNote = typeof ctx.reopenNote === 'string' ? ctx.reopenNote : '';

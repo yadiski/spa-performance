@@ -2,6 +2,8 @@ import { REFRESH_QUEUE, refreshDashboardViews } from './dashboards/aggregates';
 import { db } from './db/client';
 import { runDailyAuditAnchor } from './jobs/daily-audit-anchor';
 import { runGeneratePmsPdf } from './jobs/generate-pms-pdf';
+import type { GenerateXlsxJob } from './jobs/generate-xlsx';
+import { runGenerateXlsx } from './jobs/generate-xlsx';
 import { boss, startBoss } from './jobs/queue';
 import type { SendEmailJob } from './jobs/send-email';
 import { runSendEmail } from './jobs/send-email';
@@ -9,6 +11,7 @@ import { runSendEmail } from './jobs/send-email';
 const ANCHOR_QUEUE = 'audit.anchor.daily';
 const PDF_QUEUE = 'pms.generate_pdf';
 const EMAIL_QUEUE = 'notifications.send_email';
+const XLSX_QUEUE = 'exports.generate_xlsx';
 
 await startBoss();
 // pg-boss v10: queues must exist before schedule() or work() can reference them.
@@ -36,10 +39,24 @@ await boss.work<SendEmailJob>(EMAIL_QUEUE, async (jobs) => {
   }
 });
 
+await boss.createQueue(XLSX_QUEUE);
+await boss.work<GenerateXlsxJob>(XLSX_QUEUE, async (jobs) => {
+  for (const job of jobs) {
+    await runGenerateXlsx(db, job.data.exportJobId);
+  }
+});
+
 await boss.createQueue(REFRESH_QUEUE);
 await boss.work(REFRESH_QUEUE, async () => {
   await refreshDashboardViews(db);
 });
 await boss.schedule(REFRESH_QUEUE, '*/10 * * * *');
 
-console.log('worker ready — queues:', ANCHOR_QUEUE, PDF_QUEUE, EMAIL_QUEUE, REFRESH_QUEUE);
+console.log(
+  'worker ready — queues:',
+  ANCHOR_QUEUE,
+  PDF_QUEUE,
+  EMAIL_QUEUE,
+  XLSX_QUEUE,
+  REFRESH_QUEUE,
+);
