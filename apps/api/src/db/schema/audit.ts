@@ -2,7 +2,9 @@ import {
   bigserial,
   customType,
   date,
+  index,
   inet,
+  integer,
   jsonb,
   pgTable,
   text,
@@ -34,3 +36,17 @@ export const auditAnchor = pgTable('audit_anchor', {
   date: date('date').primaryKey(),
   rootHash: bytea('root_hash').notNull(),
 });
+
+export const auditArchiveManifest = pgTable(
+  'audit_archive_manifest',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    periodStart: date('period_start').notNull(),
+    periodEnd: date('period_end').notNull(),
+    r2Key: text('r2_key').notNull().unique(),
+    sha256: text('sha256').notNull(),
+    rowCount: integer('row_count').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('audit_archive_manifest_period_idx').on(t.periodStart, t.periodEnd)],
+);
