@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CalibrationOutput } from '../../../api/ai';
 import { aiApi } from '../../../api/ai';
+import { api } from '../../../api/client';
 import { AiPanel } from '../../../components/ai/AiPanel';
 import type { CalibrationCell } from '../../../components/dashboard/CalibrationMatrix';
 import { CalibrationMatrix } from '../../../components/dashboard/CalibrationMatrix';
@@ -11,47 +12,62 @@ export const Route = createFileRoute('/_app/hr/calibration')({
   component: HrCalibration,
 });
 
-// ---------------------------------------------------------------------------
-// Override modal — stub: saves to localStorage with a TODO for real backend
-// ---------------------------------------------------------------------------
-interface OverrideNote {
-  staffKey: string;
-  staffName: string;
+interface CalibrationNoteRow {
+  id: string;
+  gradeId: string;
+  fy: number;
+  subjectKey: string;
+  subjectName: string;
   note: string;
-  savedAt: string;
+  updatedAt: string;
 }
 
 function OverrideModal({
   cell,
+  gradeId,
+  fy,
   onClose,
 }: {
   cell: CalibrationCell;
+  gradeId: string;
+  fy: number;
   onClose: () => void;
 }) {
-  const storageKey = `calibration_override_${cell.staffKey}`;
-  const [note, setNote] = useState(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw) return (JSON.parse(raw) as OverrideNote).note;
-    } catch {
-      /* ignore */
-    }
-    return '';
-  });
+  const qc = useQueryClient();
+  const [note, setNote] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
-    // TODO: wire to a real PATCH endpoint (e.g. PATCH /api/v1/cycle/:cycleId/calibration-note)
-    // For now, persist in localStorage as a UX placeholder.
-    const payload: OverrideNote = {
-      staffKey: cell.staffKey,
-      staffName: cell.staffName,
-      note,
-      savedAt: new Date().toISOString(),
-    };
-    localStorage.setItem(storageKey, JSON.stringify(payload));
-    setSaved(true);
-  };
+  const notesKey = ['calibration', 'notes', gradeId, fy] as const;
+
+  const existing = useQuery({
+    queryKey: notesKey,
+    queryFn: () =>
+      api<{ items: CalibrationNoteRow[] }>(`/api/v1/calibration/notes?gradeId=${gradeId}&fy=${fy}`),
+  });
+
+  useEffect(() => {
+    const found = existing.data?.items.find((n) => n.subjectKey === cell.staffKey);
+    if (found) setNote(found.note);
+  }, [existing.data, cell.staffKey]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      await api('/api/v1/calibration/notes', {
+        method: 'POST',
+        body: JSON.stringify({
+          gradeId,
+          fy,
+          subjectKey: cell.staffKey,
+          subjectName: cell.staffName,
+          note,
+        }),
+      });
+    },
+    onSuccess: async () => {
+      setSaved(true);
+      await qc.invalidateQueries({ queryKey: notesKey });
+    },
+  });
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -89,9 +105,9 @@ function OverrideModal({
             className="w-full text-sm border border-hairline rounded-sm p-2 bg-white"
             placeholder="Reason for manual calibration override…"
           />
-          <p className="text-xs text-ink-2 mt-1">
-            Note: this is currently stored locally (TODO: persist server-side).
-          </p>
+          {save.error && (
+            <p className="text-xs text-neg mt-1">Save failed. Try again in a moment.</p>
+          )}
         </div>
 
         <div className="flex gap-2 justify-end">
@@ -104,10 +120,11 @@ function OverrideModal({
           </button>
           <button
             type="button"
-            onClick={handleSave}
-            className="text-sm border border-hairline rounded-sm px-3 py-1.5 bg-ink text-white hover:bg-ink/90 transition-colors"
+            onClick={() => save.mutate()}
+            disabled={save.isPending || note.trim().length === 0}
+            className="text-sm border border-hairline rounded-sm px-3 py-1.5 bg-ink text-white hover:bg-ink/90 transition-colors disabled:opacity-50"
           >
-            {saved ? 'Saved' : 'Save note'}
+            {save.isPending ? 'Saving…' : saved ? 'Saved' : 'Save note'}
           </button>
         </div>
       </div>
@@ -123,7 +140,11 @@ function HrCalibration() {
   const currentFy = new Date().getFullYear();
   const [fy, setFy] = useState(currentFy);
   const [expandedGradeId, setExpandedGradeId] = useState<string | null>(null);
-  const [overrideCell, setOverrideCell] = useState<CalibrationCell | null>(null);
+  const [overrideCtx, setOverrideCtx] = useState<{
+    cell: CalibrationCell;
+    gradeId: string;
+    fy: number;
+  } | null>(null);
 
   const cohortsQuery = useQuery({
     queryKey: ['ai', 'calibration-cohorts', fy],
@@ -234,7 +255,7 @@ function HrCalibration() {
                           <button
                             key={cell.staffKey}
                             type="button"
-                            onClick={() => setOverrideCell(cell)}
+                            onClick={() => setOverrideCtx({ cell, gradeId: cohort.gradeId, fy })}
                             className="text-xs border border-red-200 bg-red-50 text-red-700 rounded-sm px-2 py-1 hover:bg-red-100 transition-colors"
                           >
                             Override: {cell.staffName}
@@ -303,7 +324,14 @@ function HrCalibration() {
       </div>
 
       {/* Override modal */}
-      {overrideCell && <OverrideModal cell={overrideCell} onClose={() => setOverrideCell(null)} />}
+      {overrideCtx && (
+        <OverrideModal
+          cell={overrideCtx.cell}
+          gradeId={overrideCtx.gradeId}
+          fy={overrideCtx.fy}
+          onClose={() => setOverrideCtx(null)}
+        />
+      )}
     </div>
   );
 }

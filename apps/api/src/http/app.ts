@@ -11,6 +11,7 @@ import { requireAuth } from '../auth/middleware';
 import { adminSessionRoutes, sessionRoutes } from '../auth/session-routes';
 import { accessReviewRoutes } from '../compliance/routes';
 import { dashboardRoutes } from '../dashboards/routes';
+import { calibrationRoutes } from '../domain/calibration/routes';
 import { cycleRoutes } from '../domain/cycle/routes';
 import { kraRoutes } from '../domain/kra/routes';
 import { midYearRoutes } from '../domain/mid-year/routes';
@@ -109,3 +110,4 @@ app.route('/api/v1/admin/impersonation', impersonationRoutes);
 app.route('/api/v1/onboarding', onboardingRoutes);
 // Phase 4.10 — Access reviews
 app.route('/api/v1/admin/access-review', accessReviewRoutes);
+app.route('/api/v1/calibration', calibrationRoutes);
