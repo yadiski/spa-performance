@@ -2,11 +2,7 @@ import { createHash } from 'node:crypto';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl as awsGetSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-let client: S3Client | null = null;
-
 function getClient(): S3Client {
-  if (client) return client;
-
   const accountId = process.env.R2_ACCOUNT_ID;
   const accessKeyId = process.env.R2_ACCESS_KEY_ID;
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
@@ -18,14 +14,12 @@ function getClient(): S3Client {
     );
   }
 
-  client = new S3Client({
+  return new S3Client({
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     region: 'auto',
     credentials: { accessKeyId, secretAccessKey },
     forcePathStyle: false,
   });
-
-  return client;
 }
 
 export async function put(

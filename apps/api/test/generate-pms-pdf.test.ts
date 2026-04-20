@@ -5,24 +5,24 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import { KraPerspective } from '@spa/shared';
 import { eq, sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
+import * as r2 from '../src/storage/r2';
 
-// Stub r2.put so no real S3 calls happen
 const FAKE_SHA256 = `aabbcc${'0'.repeat(58)}`;
-mock.module('../src/storage/r2', () => ({
-  put: mock(async (_key: string, _bytes: Uint8Array, _ct: string) => ({ sha256: FAKE_SHA256 })),
-  getSignedUrl: mock(async (key: string) => `https://cdn.example.com/${key}?sig=fake`),
-}));
+const putSpy = spyOn(r2, 'put').mockImplementation(async () => ({ sha256: FAKE_SHA256 }));
 
-// Import after mocking
 import { runGeneratePmsPdf } from '../src/jobs/generate-pms-pdf';
 
 describe('runGeneratePmsPdf', () => {
+  afterAll(() => {
+    putSpy.mockRestore();
+  });
+
   let cycleId: string;
   let snapshotId: string;
   const actorId = '00000000-0000-0000-0000-000000000001';
