@@ -52,3 +52,28 @@ export async function getSignedUrl(key: string, ttlSec = 86400): Promise<string>
     expiresIn: ttlSec,
   });
 }
+
+export async function get(key: string): Promise<Buffer> {
+  const c = getClient();
+  const bucket = process.env.R2_BUCKET!;
+
+  const res = await c.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+
+  if (!res.Body) {
+    throw new Error(`R2 object not found or empty: ${key}`);
+  }
+
+  const chunks: Uint8Array[] = [];
+  // Body is a ReadableStream (web) or NodeJS stream — collect to buffer
+  for await (const chunk of res.Body as AsyncIterable<Uint8Array>) {
+    chunks.push(chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk as ArrayBufferLike));
+  }
+  const total = chunks.reduce((n, c) => n + c.length, 0);
+  const buf = Buffer.allocUnsafe(total);
+  let offset = 0;
+  for (const c of chunks) {
+    buf.set(c, offset);
+    offset += c.length;
+  }
+  return buf;
+}

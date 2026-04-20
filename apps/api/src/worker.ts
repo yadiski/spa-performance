@@ -1,5 +1,7 @@
 import { REFRESH_QUEUE, refreshDashboardViews } from './dashboards/aggregates';
 import { db } from './db/client';
+import { runAuditAnchorAlert } from './jobs/audit-anchor-alert';
+import { runAuditArchiveJob } from './jobs/audit-archive';
 import { runDailyAuditAnchor } from './jobs/daily-audit-anchor';
 import { runGeneratePmsPdf } from './jobs/generate-pms-pdf';
 import type { GenerateXlsxJob } from './jobs/generate-xlsx';
@@ -9,6 +11,8 @@ import type { SendEmailJob } from './jobs/send-email';
 import { runSendEmail } from './jobs/send-email';
 
 const ANCHOR_QUEUE = 'audit.anchor.daily';
+const ANCHOR_ALERT_QUEUE = 'audit.anchor_alert';
+const ARCHIVE_QUEUE = 'audit.archive';
 const PDF_QUEUE = 'pms.generate_pdf';
 const EMAIL_QUEUE = 'notifications.send_email';
 const XLSX_QUEUE = 'exports.generate_xlsx';
@@ -21,6 +25,18 @@ await boss.work(ANCHOR_QUEUE, async () => {
   await runDailyAuditAnchor(yesterday);
 });
 await boss.schedule(ANCHOR_QUEUE, '5 0 * * *');
+
+await boss.createQueue(ANCHOR_ALERT_QUEUE);
+await boss.work(ANCHOR_ALERT_QUEUE, async () => {
+  await runAuditAnchorAlert(db);
+});
+await boss.schedule(ANCHOR_ALERT_QUEUE, '10 0 * * *');
+
+await boss.createQueue(ARCHIVE_QUEUE);
+await boss.work(ARCHIVE_QUEUE, async () => {
+  await runAuditArchiveJob(db);
+});
+await boss.schedule(ARCHIVE_QUEUE, '0 2 * * *');
 
 await boss.createQueue(PDF_QUEUE);
 await boss.work<{ cycleId: string; snapshotId: string; actorId: string }>(
@@ -55,6 +71,8 @@ await boss.schedule(REFRESH_QUEUE, '*/10 * * * *');
 console.log(
   'worker ready — queues:',
   ANCHOR_QUEUE,
+  ANCHOR_ALERT_QUEUE,
+  ARCHIVE_QUEUE,
   PDF_QUEUE,
   EMAIL_QUEUE,
   XLSX_QUEUE,
