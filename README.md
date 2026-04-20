@@ -5,7 +5,8 @@ Monorepo for Payong-Legam's performance management system. Bun workspaces, Hono 
 ## Phase status
 
 - **Phase 1 (foundation):** complete. Auth, org/staff import, cycle state machine, KRA workflow, audit log chain, daily anchor job.
-- **Phase 2 (PMS workflow):** complete as of `5dad6be`. Mid-year checkpoint, full PMS form (Parts I–VI with 22 behavioural rubrics), e-signature chain, React-PDF generation + R2 upload, notification fan-out (in-app + email via Resend), HR cycle control, end-to-end acceptance test.
+- **Phase 2 (PMS workflow):** complete. Tag `phase-2-alpha`. Mid-year checkpoint, full PMS form (Parts I–VI with 22 behavioural rubrics), e-signature chain, React-PDF generation + R2 upload, notification fan-out (in-app + email via Resend), HR cycle control, end-to-end acceptance test.
+- **Phase 3 (AI + dashboards):** complete. Tag `phase-3-alpha`. OpenRouter-backed dispatcher (cache / budget / advisory-lock stampede guard / audit), five AI features (staff summary, KRA quality, dev recommendations, calibration, mid-year nudges), role-scoped dashboards over materialized views, trigram staff search, XLSX org-wide export via pg-boss + R2, plus scoping / prompt-injection / budget red-team + acceptance suites.
 
 See `docs/superpowers/plans/` for the per-phase plan documents and exit checklists.
 
@@ -20,6 +21,16 @@ See `docs/superpowers/plans/` for the per-phase plan documents and exit checklis
 - Notifications: `notification` table, pure-function templates, Resend client, `notifications.send_email` pg-boss job, dispatcher fires on every workflow transition, web inbox at `/notifications` with bell counter in the header.
 - Web forms: role-scoped stepper forms for staff self-review, appraiser rating (with 22 BehaviouralAnchor pickers), next-level review, HRA finalize. HR cycles list with per-staff and bulk window controls.
 - Red-team scoping test plus Phase-2 acceptance test that drives the full cycle and asserts PDF hash + signature chain + audit chain.
+
+## What Phase 3 shipped
+
+- AI core: `ai/core/dispatch.ts` composes cache lookup, Postgres advisory-lock stampede guard, per-org daily token budget, per-user hourly rate limit, OpenRouter call (native fetch, 5s abort, 2 retries on 429/5xx), Zod schema validation, and audit logging.
+- Five AI features behind the dispatcher: staff-summary, kra-quality, dev-recommendations, calibration (anonymized peers), mid-year-nudges. Each with a scoped cache key (`org:<id>|subject:<id>`) that prevents cross-org leakage.
+- AI UI: `AiTag`, `AiPanel`, `AiBudgetBar` shared components; panels injected into staff cycle page, KRA drafting page, mid-year review page, HR calibration page, team review career step. Budget bar surfaces 50 %→ and hard-stops at 100 % for HRA.
+- Role-scoped dashboards: three materialized views (`mv_cycle_summary`, `mv_dept_rollup`, `mv_org_rollup`) refreshed every 10 minutes via pg-boss cron, read through `/api/v1/dashboards/{me|team|dept|hr}`. Recharts-backed StatCard / TrajectoryBar / DistributionHistogram / CalibrationMatrix with an enterprise-formal `chartTheme`.
+- Staff directory search: `pg_trgm` + GIN index on a trigger-populated `search_text` column, scoped by `staffReadScope`. `StaffSearchCombobox` on the department dashboard.
+- XLSX exports: `POST /api/v1/exports/pms-org` queues a pg-boss job that generates an exceljs workbook, uploads to R2, stamps sha256, and notifies the requester. `/hr/exports` page polls and re-downloads via signed URL.
+- Hardening: scoping red-team covers every Phase-3 route incl. cross-org cache leakage probe; prompt-injection test verifies `.strict()` schema gate; budget red-team covers cap exhaustion, cache-hit bypass, and stampede guard; Phase-3 acceptance test drives the whole flow in ~1s.
 
 ## Running locally
 
