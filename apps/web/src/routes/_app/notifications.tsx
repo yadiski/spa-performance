@@ -16,6 +16,7 @@ const KIND_LABELS: Record<string, string> = {
   'pms.finalized': 'Performance review finalized',
   'pms.reopened': 'Review reopened',
   'pms.pdf.ready': 'PDF ready to download',
+  'export.ready': 'Export ready to download',
 };
 
 function kindLabel(kind: string): string {
