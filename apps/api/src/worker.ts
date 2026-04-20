@@ -1,3 +1,4 @@
+import { REFRESH_QUEUE, refreshDashboardViews } from './dashboards/aggregates';
 import { db } from './db/client';
 import { runDailyAuditAnchor } from './jobs/daily-audit-anchor';
 import { runGeneratePmsPdf } from './jobs/generate-pms-pdf';
@@ -35,4 +36,10 @@ await boss.work<SendEmailJob>(EMAIL_QUEUE, async (jobs) => {
   }
 });
 
-console.log('worker ready — queues:', ANCHOR_QUEUE, PDF_QUEUE, EMAIL_QUEUE);
+await boss.createQueue(REFRESH_QUEUE);
+await boss.work(REFRESH_QUEUE, async () => {
+  await refreshDashboardViews(db);
+});
+await boss.schedule(REFRESH_QUEUE, '*/10 * * * *');
+
+console.log('worker ready — queues:', ANCHOR_QUEUE, PDF_QUEUE, EMAIL_QUEUE, REFRESH_QUEUE);

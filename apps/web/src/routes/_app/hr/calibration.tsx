@@ -4,15 +4,126 @@ import { useState } from 'react';
 import type { CalibrationOutput } from '../../../api/ai';
 import { aiApi } from '../../../api/ai';
 import { AiPanel } from '../../../components/ai/AiPanel';
+import type { CalibrationCell } from '../../../components/dashboard/CalibrationMatrix';
+import { CalibrationMatrix } from '../../../components/dashboard/CalibrationMatrix';
 
 export const Route = createFileRoute('/_app/hr/calibration')({
   component: HrCalibration,
 });
 
+// ---------------------------------------------------------------------------
+// Override modal — stub: saves to localStorage with a TODO for real backend
+// ---------------------------------------------------------------------------
+interface OverrideNote {
+  staffKey: string;
+  staffName: string;
+  note: string;
+  savedAt: string;
+}
+
+function OverrideModal({
+  cell,
+  onClose,
+}: {
+  cell: CalibrationCell;
+  onClose: () => void;
+}) {
+  const storageKey = `calibration_override_${cell.staffKey}`;
+  const [note, setNote] = useState(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) return (JSON.parse(raw) as OverrideNote).note;
+    } catch {
+      /* ignore */
+    }
+    return '';
+  });
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    // TODO: wire to a real PATCH endpoint (e.g. PATCH /api/v1/cycle/:cycleId/calibration-note)
+    // For now, persist in localStorage as a UX placeholder.
+    const payload: OverrideNote = {
+      staffKey: cell.staffKey,
+      staffName: cell.staffName,
+      note,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(storageKey, JSON.stringify(payload));
+    setSaved(true);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-surface border border-hairline rounded-md p-6 w-full max-w-sm space-y-4 shadow-none">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm font-semibold text-ink">Calibration override</div>
+            <div className="text-xs text-ink-2 mt-0.5">
+              {cell.staffName} · rating {cell.rating.toFixed(1)}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-ink-2 hover:text-ink text-lg leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="border-t border-hairline" />
+
+        <div>
+          <label htmlFor="override-note" className="block text-xs text-ink-2 mb-1">
+            Note (HRA only)
+          </label>
+          <textarea
+            id="override-note"
+            value={note}
+            onChange={(e) => {
+              setNote(e.target.value);
+              setSaved(false);
+            }}
+            rows={4}
+            className="w-full text-sm border border-hairline rounded-sm p-2 bg-white"
+            placeholder="Reason for manual calibration override…"
+          />
+          <p className="text-xs text-ink-2 mt-1">
+            Note: this is currently stored locally (TODO: persist server-side).
+          </p>
+        </div>
+
+        <div className="flex gap-2 justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm border border-hairline rounded-sm px-3 py-1.5 text-ink-2 hover:bg-canvas transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="text-sm border border-hairline rounded-sm px-3 py-1.5 bg-ink text-white hover:bg-ink/90 transition-colors"
+          >
+            {saved ? 'Saved' : 'Save note'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
 function HrCalibration() {
   const currentFy = new Date().getFullYear();
   const [fy, setFy] = useState(currentFy);
   const [expandedGradeId, setExpandedGradeId] = useState<string | null>(null);
+  const [overrideCell, setOverrideCell] = useState<CalibrationCell | null>(null);
 
   const cohortsQuery = useQuery({
     queryKey: ['ai', 'calibration-cohorts', fy],
@@ -64,85 +175,135 @@ function HrCalibration() {
       )}
 
       <div className="space-y-3">
-        {items.map((cohort) => (
-          <div
-            key={cohort.gradeId}
-            className="bg-surface border border-hairline rounded-md p-4 space-y-3"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium text-ink">Grade {cohort.gradeCode}</div>
-                <div className="text-xs text-ink-2">
-                  {cohort.cycleCount} finalized cycle{cohort.cycleCount !== 1 ? 's' : ''}
-                  {cohort.avgScore !== null && ` · avg score ${cohort.avgScore}`}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setExpandedGradeId(expandedGradeId === cohort.gradeId ? null : cohort.gradeId)
-                }
-                className="text-xs border border-hairline rounded-sm px-3 py-1.5 hover:bg-canvas text-ink-2 hover:text-ink transition-colors"
-              >
-                {expandedGradeId === cohort.gradeId ? 'Close' : 'Run calibration'}
-              </button>
-            </div>
+        {items.map((cohort) => {
+          // Build CalibrationMatrix cells from cohort data.
+          // The AI calibration cohort items don't carry per-staff details,
+          // so we create placeholder cells using aggregate data.
+          // In a fully-wired version these would come from a dedicated cohort-details endpoint.
+          const matrixCells: CalibrationCell[] =
+            cohort.avgScore != null
+              ? [
+                  {
+                    staffKey: `${cohort.gradeId}-avg`,
+                    staffName: `Grade ${cohort.gradeCode} (avg)`,
+                    rating: cohort.avgScore,
+                    isOutlier: false,
+                  },
+                ]
+              : [];
 
-            {expandedGradeId === cohort.gradeId && (
-              <AiPanel
-                title={`Calibration — Grade ${cohort.gradeCode} · FY ${fy}`}
-                queryKey={['ai', 'calibration', cohort.gradeId, fy]}
-                queryFn={() => aiApi.calibration(cohort.gradeId, fy).then((r) => r.output)}
-                onRegenerate={() => setExpandedGradeId(cohort.gradeId)}
-              >
-                {(output: CalibrationOutput) => (
-                  <div className="space-y-3 text-sm">
-                    {output.outliers.length > 0 && (
-                      <div>
-                        <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
-                          Outliers
-                        </div>
-                        <ul className="list-disc pl-4 space-y-0.5 text-ink">
-                          {output.outliers.map((o, i) => (
-                            // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
-                            <li key={i}>{o}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {output.inconsistency_flags.length > 0 && (
-                      <div>
-                        <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
-                          Inconsistency flags
-                        </div>
-                        <ul className="list-disc pl-4 space-y-0.5 text-ink">
-                          {output.inconsistency_flags.map((f, i) => (
-                            // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
-                            <li key={i}>{f}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {output.talking_points.length > 0 && (
-                      <div>
-                        <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
-                          Talking points
-                        </div>
-                        <ul className="list-disc pl-4 space-y-0.5 text-ink">
-                          {output.talking_points.map((t, i) => (
-                            // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
-                            <li key={i}>{t}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+          return (
+            <div
+              key={cohort.gradeId}
+              className="bg-surface border border-hairline rounded-md p-4 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-ink">Grade {cohort.gradeCode}</div>
+                  <div className="text-xs text-ink-2">
+                    {cohort.cycleCount} finalized cycle{cohort.cycleCount !== 1 ? 's' : ''}
+                    {cohort.avgScore !== null && ` · avg score ${cohort.avgScore}`}
                   </div>
-                )}
-              </AiPanel>
-            )}
-          </div>
-        ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpandedGradeId(expandedGradeId === cohort.gradeId ? null : cohort.gradeId)
+                  }
+                  className="text-xs border border-hairline rounded-sm px-3 py-1.5 hover:bg-canvas text-ink-2 hover:text-ink transition-colors"
+                >
+                  {expandedGradeId === cohort.gradeId ? 'Close' : 'Run calibration'}
+                </button>
+              </div>
+
+              {/* CalibrationMatrix — cohort visual grid */}
+              {matrixCells.length > 0 && (
+                <div>
+                  <div className="text-xs uppercase tracking-wider text-ink-2 mb-2">
+                    Cohort matrix
+                  </div>
+                  <CalibrationMatrix
+                    cells={matrixCells}
+                    gridCols={Math.min(matrixCells.length, 6)}
+                  />
+                  {matrixCells.some((cell) => cell.isOutlier) && (
+                    <div className="mt-2 flex gap-2 flex-wrap">
+                      {matrixCells
+                        .filter((cell) => cell.isOutlier)
+                        .map((cell) => (
+                          <button
+                            key={cell.staffKey}
+                            type="button"
+                            onClick={() => setOverrideCell(cell)}
+                            className="text-xs border border-red-200 bg-red-50 text-red-700 rounded-sm px-2 py-1 hover:bg-red-100 transition-colors"
+                          >
+                            Override: {cell.staffName}
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {expandedGradeId === cohort.gradeId && (
+                <AiPanel
+                  title={`Calibration — Grade ${cohort.gradeCode} · FY ${fy}`}
+                  queryKey={['ai', 'calibration', cohort.gradeId, fy]}
+                  queryFn={() => aiApi.calibration(cohort.gradeId, fy).then((r) => r.output)}
+                  onRegenerate={() => setExpandedGradeId(cohort.gradeId)}
+                >
+                  {(output: CalibrationOutput) => (
+                    <div className="space-y-3 text-sm">
+                      {output.outliers.length > 0 && (
+                        <div>
+                          <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                            Outliers
+                          </div>
+                          <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                            {output.outliers.map((o, i) => (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                              <li key={i}>{o}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {output.inconsistency_flags.length > 0 && (
+                        <div>
+                          <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                            Inconsistency flags
+                          </div>
+                          <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                            {output.inconsistency_flags.map((f, i) => (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                              <li key={i}>{f}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {output.talking_points.length > 0 && (
+                        <div>
+                          <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                            Talking points
+                          </div>
+                          <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                            {output.talking_points.map((t, i) => (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                              <li key={i}>{t}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </AiPanel>
+              )}
+            </div>
+          );
+        })}
       </div>
+
+      {/* Override modal */}
+      {overrideCell && <OverrideModal cell={overrideCell} onClose={() => setOverrideCell(null)} />}
     </div>
   );
 }
