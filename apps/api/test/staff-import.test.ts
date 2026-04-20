@@ -7,11 +7,14 @@ process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
 import { beforeEach, describe, expect, it } from 'bun:test';
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
 import { importStaffCsv } from '../src/domain/staff/import';
+
+const csvPath = resolve(import.meta.dir, '../../../infra/seeds/sample-staff.csv');
 
 describe('importStaffCsv', () => {
   let orgId: string;
@@ -37,7 +40,7 @@ describe('importStaffCsv', () => {
   });
 
   it('imports all 4 staff and links manager chain', async () => {
-    const csv = readFileSync('../../infra/seeds/sample-staff.csv', 'utf-8');
+    const csv = readFileSync(csvPath, 'utf-8');
     const report = await importStaffCsv(orgId, csv);
 
     expect(report.created).toBe(4);
@@ -67,7 +70,7 @@ describe('importStaffCsv', () => {
   });
 
   it('re-import is idempotent: second run reports updated=4, created=0', async () => {
-    const csv = readFileSync('../../infra/seeds/sample-staff.csv', 'utf-8');
+    const csv = readFileSync(csvPath, 'utf-8');
     await importStaffCsv(orgId, csv);
     const second = await importStaffCsv(orgId, csv);
     expect(second.created).toBe(0);

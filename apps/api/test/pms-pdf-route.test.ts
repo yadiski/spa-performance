@@ -5,17 +5,16 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
+import * as r2 from '../src/storage/r2';
 
-// Stub r2.getSignedUrl so no real S3 call happens
-mock.module('../src/storage/r2', () => ({
-  put: mock(async () => ({ sha256: 'fake' })),
-  getSignedUrl: mock(async (key: string) => `https://cdn.example.com/${key}?sig=fake`),
-}));
+const getSignedUrlSpy = spyOn(r2, 'getSignedUrl').mockImplementation(
+  async (key: string) => `https://cdn.example.com/${key}?sig=fake`,
+);
 
 import { app } from '../src/http/app';
 
@@ -43,6 +42,10 @@ async function getAs(cookie: string, path: string): Promise<Response> {
 }
 
 describe('GET /api/v1/pms/:cycleId/pdf', () => {
+  afterAll(() => {
+    getSignedUrlSpy.mockRestore();
+  });
+
   let cycleId: string;
   let snapshotId: string;
   let hraCookie: string;
