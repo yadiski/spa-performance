@@ -5,8 +5,8 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { beforeEach, describe, expect, it } from 'bun:test';
-import { KraPerspective } from '@spa/shared';
+import { afterAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
+import { KraPerspective, NotificationKind } from '@spa/shared';
 import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import type { Actor } from '../src/auth/middleware';
@@ -14,6 +14,15 @@ import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
 import { openMidYearWindow } from '../src/domain/cycle/windows';
 import { ackMidYear, saveMidYearUpdate, submitMidYearUpdate } from '../src/domain/mid-year/service';
+import * as queue from '../src/jobs/queue';
+
+const bossSendSpy = spyOn(queue.boss, 'send').mockImplementation(
+  async () => null as unknown as string,
+);
+
+afterAll(() => {
+  bossSendSpy.mockRestore();
+});
 
 function mkActor(o: Partial<Actor>): Actor {
   return {
@@ -47,8 +56,10 @@ describe('mid-year service', () => {
   let kraIds: string[];
 
   beforeEach(async () => {
+    bossSendSpy.mockClear();
+
     const client = postgres(process.env.DATABASE_URL!, { max: 1 });
-    await client`truncate table audit_log`;
+    await client`truncate table notification, audit_log`;
     await client`truncate table mid_year_checkpoint cascade`;
     await client`truncate table approval_transition, performance_cycle, kra_progress_update, kra cascade`;
     await client`truncate table staff_role, staff, grade, department, organization, "user" cascade`;
@@ -239,6 +250,37 @@ describe('mid-year service', () => {
       'mid_year.submitted',
       'mid_year.acked',
     ]);
+
+    // Notification: MidYearOpened → appraisee
+    const openedNotif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${staffStaffId} and kind = ${NotificationKind.MidYearOpened} and target_id = ${cycleId}`,
+      );
+    expect(openedNotif.length).toBe(1);
+
+    // Notification: MidYearSubmitted → appraiser (not appraisee)
+    const submittedNotif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${mgrStaffId} and kind = ${NotificationKind.MidYearSubmitted} and target_id = ${cycleId}`,
+      );
+    expect(submittedNotif.length).toBe(1);
+
+    // Notification: MidYearAcked → appraisee
+    const ackedNotif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${staffStaffId} and kind = ${NotificationKind.MidYearAcked} and target_id = ${cycleId}`,
+      );
+    expect(ackedNotif.length).toBe(1);
+
+    // No notification for mid_year.saved (drafts are noisy)
+    const savedNotif = await db.select().from(s.notification).where(sql`kind = 'mid_year.saved'`);
+    expect(savedNotif.length).toBe(0);
   });
 
   it('submit without any updates returns no_updates', async () => {

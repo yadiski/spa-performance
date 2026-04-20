@@ -1,5 +1,5 @@
 import type { MidYearAck, MidYearSave, MidYearSubmit } from '@spa/shared';
-import { CycleState } from '@spa/shared';
+import { CycleState, NotificationKind } from '@spa/shared';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { writeAudit } from '../../audit/log';
 import type { Actor } from '../../auth/middleware';
@@ -12,6 +12,8 @@ import {
   performanceCycle,
 } from '../../db/schema';
 import { validate } from '../cycle/state-machine';
+import { dispatchNotifications } from '../notifications/dispatch';
+import { resolveCycleActors } from '../notifications/recipients';
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -147,6 +149,18 @@ export async function submitMidYearUpdate(
       ip: actor.ip,
       ua: actor.ua,
     });
+
+    const actors = await resolveCycleActors(tx, cycle.id);
+    if (actors.appraiserStaffId) {
+      await dispatchNotifications(tx, {
+        kind: NotificationKind.MidYearSubmitted,
+        payload: { cycleId: cycle.id, fromState: cycle.state, toState: v.to },
+        recipients: [{ staffId: actors.appraiserStaffId }],
+        targetType: 'cycle',
+        targetId: cycle.id,
+      });
+    }
+
     return { ok: true };
   });
 }
@@ -198,6 +212,23 @@ export async function ackMidYear(db: DB, actor: Actor, input: MidYearAck): Promi
       ip: actor.ip,
       ua: actor.ua,
     });
+
+    const actors = await resolveCycleActors(tx, cycle.id);
+    if (actors.appraiseeStaffId) {
+      await dispatchNotifications(tx, {
+        kind: NotificationKind.MidYearAcked,
+        payload: {
+          cycleId: cycle.id,
+          fromState: cycle.state,
+          toState: v.to,
+          note: input.note ?? null,
+        },
+        recipients: [{ staffId: actors.appraiseeStaffId }],
+        targetType: 'cycle',
+        targetId: cycle.id,
+      });
+    }
+
     return { ok: true };
   });
 }

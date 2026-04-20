@@ -5,9 +5,9 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { beforeEach, describe, expect, it, setDefaultTimeout } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, it, setDefaultTimeout, spyOn } from 'bun:test';
 setDefaultTimeout(30_000);
-import { KraPerspective } from '@spa/shared';
+import { KraPerspective, NotificationKind } from '@spa/shared';
 import { eq, sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import type { Actor } from '../src/auth/middleware';
@@ -24,6 +24,15 @@ import {
   submitNextLevel,
   submitSelfReview,
 } from '../src/domain/pms/transitions';
+import * as queue from '../src/jobs/queue';
+
+const bossSendSpy = spyOn(queue.boss, 'send').mockImplementation(
+  async () => null as unknown as string,
+);
+
+afterAll(() => {
+  bossSendSpy.mockRestore();
+});
 
 function mkActor(o: Partial<Actor>): Actor {
   return {
@@ -50,8 +59,10 @@ describe('pms transitions + scoring + re-open', () => {
   let kraIds: string[];
 
   beforeEach(async () => {
+    bossSendSpy.mockClear();
+
     const client = postgres(process.env.DATABASE_URL!, { max: 1 });
-    await client`truncate table audit_log, pms_comment, personal_growth, career_development, staff_contribution, behavioural_rating, pms_kra_rating, pms_final_snapshot, cycle_amendment, pms_assessment, mid_year_checkpoint, approval_transition, kra_progress_update, kra, performance_cycle, staff_role, staff, grade, department, organization, "user" cascade`;
+    await client`truncate table notification, audit_log, pms_comment, personal_growth, career_development, staff_contribution, behavioural_rating, pms_kra_rating, pms_final_snapshot, cycle_amendment, pms_assessment, mid_year_checkpoint, approval_transition, kra_progress_update, kra, performance_cycle, staff_role, staff, grade, department, organization, "user" cascade`;
     await client.end({ timeout: 2 });
 
     // Ensure behavioural_dimension seed survives the truncate
@@ -276,6 +287,50 @@ describe('pms transitions + scoring + re-open', () => {
     ) as Array<{ id: string; score_total: string }>;
     expect(snapRows.length).toBe(1);
     expect(Number(snapRows[0]?.score_total)).toBeGreaterThan(0);
+
+    // Notification: self-review submitted → appraiser
+    const selfRevNotif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${mgrStaffId} and kind = ${NotificationKind.PmsSelfReviewSubmitted} and target_id = ${cycleId}`,
+      );
+    expect(selfRevNotif.length).toBeGreaterThanOrEqual(1);
+
+    // Notification: appraiser submitted → next-level
+    const appraiserNotif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${nextLvlStaffId} and kind = ${NotificationKind.PmsAppraiserSubmitted} and target_id = ${cycleId}`,
+      );
+    expect(appraiserNotif.length).toBeGreaterThanOrEqual(1);
+
+    // Notification: next-level submitted → HRA
+    const nextLvlNotif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${hraStaffId} and kind = ${NotificationKind.PmsNextLevelSubmitted} and target_id = ${cycleId}`,
+      );
+    expect(nextLvlNotif.length).toBeGreaterThanOrEqual(1);
+
+    // Notification: pms finalized → appraisee + appraiser
+    const finalizedAppraisee = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${staffStaffId} and kind = ${NotificationKind.PmsFinalized} and target_id = ${cycleId}`,
+      );
+    expect(finalizedAppraisee.length).toBeGreaterThanOrEqual(1);
+
+    const finalizedAppraiser = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${mgrStaffId} and kind = ${NotificationKind.PmsFinalized} and target_id = ${cycleId}`,
+      );
+    expect(finalizedAppraiser.length).toBeGreaterThanOrEqual(1);
   });
 
   it('return-to-appraisee reverses self-review submission', async () => {
@@ -303,6 +358,15 @@ describe('pms transitions + scoring + re-open', () => {
       Array.isArray(transitions) ? transitions : ((transitions as { rows?: unknown[] }).rows ?? [])
     ) as Array<{ note: string | null }>;
     expect(transRows[0]?.note).toBe('Please revise section 2');
+
+    // Notification: returned to appraisee → appraisee
+    const notif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${staffStaffId} and kind = ${NotificationKind.PmsReturnedToAppraisee} and target_id = ${cycleId}`,
+      );
+    expect(notif.length).toBe(1);
   });
 
   it('return-to-appraiser reverses appraiser rating submission', async () => {
@@ -324,6 +388,15 @@ describe('pms transitions + scoring + re-open', () => {
     expect(r.ok).toBe(true);
     cycle = await db.select().from(s.performanceCycle).where(eq(s.performanceCycle.id, cycleId));
     expect(cycle[0]?.state).toBe('pms_awaiting_appraiser');
+
+    // Notification: returned to appraiser → appraiser
+    const notif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${mgrStaffId} and kind = ${NotificationKind.PmsReturnedToAppraiser} and target_id = ${cycleId}`,
+      );
+    expect(notif.length).toBe(1);
   });
 
   it('computeScore returns breakdown with total <= 5', async () => {
@@ -426,6 +499,31 @@ describe('pms transitions + scoring + re-open', () => {
     expect(amendRows[0]?.reason).toBe('Data entry error in KRA 2');
     expect(amendRows[0]?.closed_at).toBeNull();
     expect(amendRows[0]?.original_snapshot_id).not.toBeNull();
+
+    // Notification: PmsReopened → appraisee + appraiser + next-level
+    const reopenedAppraisee = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${staffStaffId} and kind = ${NotificationKind.PmsReopened} and target_id = ${cycleId}`,
+      );
+    expect(reopenedAppraisee.length).toBe(1);
+
+    const reopenedAppraiser = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${mgrStaffId} and kind = ${NotificationKind.PmsReopened} and target_id = ${cycleId}`,
+      );
+    expect(reopenedAppraiser.length).toBe(1);
+
+    const reopenedNextLevel = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${nextLvlStaffId} and kind = ${NotificationKind.PmsReopened} and target_id = ${cycleId}`,
+      );
+    expect(reopenedNextLevel.length).toBe(1);
   });
 
   it('finalize rejects non-HRA actor', async () => {
