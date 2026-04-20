@@ -5,3 +5,4 @@ export * from './audit';
 export * from './mid-year';
 export * from './pms';
 export * from './notification';
+export * from './ai';
