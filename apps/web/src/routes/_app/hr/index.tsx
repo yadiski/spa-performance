@@ -28,9 +28,6 @@ function HrIndex() {
         (() => {
           const { rollup, stateCounts, departments } = dashQ.data!;
 
-          // Build score distribution buckets from dept data (approximate from org-level)
-          // The rollup doesn't carry distribution directly, so we show a placeholder-style
-          // bucket summary from stateCounts
           const stateEntries = Object.entries(stateCounts);
 
           return (
@@ -185,6 +182,17 @@ function HrIndex() {
             <div className="text-sm font-medium text-ink group-hover:underline">Exports</div>
             <div className="text-xs text-ink-2 mt-1">
               Generate and download org-wide PMS snapshots as Excel workbooks.
+            </div>
+          </Link>
+
+          <Link
+            to="/hr/staff-import"
+            className="block bg-surface border border-hairline rounded-md p-5 hover:border-ink/30 transition-colors group"
+          >
+            <div className="text-sm font-medium text-ink group-hover:underline">Staff import</div>
+            <div className="text-xs text-ink-2 mt-1">
+              Upload an HRIS CSV to add or update staff records. Stage, validate, apply, and revert
+              within 24 hours.
             </div>
           </Link>
         </div>
