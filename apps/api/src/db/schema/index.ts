@@ -11,3 +11,4 @@ export * from './notification';
 export * from './ai';
 export * from './exports';
 export * from './security';
+export * from './rate-limit';

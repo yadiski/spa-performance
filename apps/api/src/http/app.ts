@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import { requestId } from 'hono/request-id';
 import { aiRoutes } from '../ai/routes';
 import { auditRoutes } from '../audit/routes';
@@ -20,21 +19,46 @@ import { staffRoutes } from '../domain/staff/routes';
 import { loadEnv } from '../env';
 import { exportRoutes } from '../exports/routes';
 import { searchRoutes } from '../search/routes';
+import { corsMiddleware } from './cors';
 import { onError } from './error';
+import { forceHttps } from './force-https';
+import { authIpRateLimit, mutatingRateLimit } from './rate-limit';
+import { securityHeaders } from './security-headers';
 
 const env = loadEnv();
+void env; // used for side-effect validation only; individual modules read process.env directly
 
 export const app = new Hono();
 
+// ── Middleware chain (order matters) ─────────────────────────────────────────
+
+// 1. TLS enforcement — redirect http → https in production
+app.use('*', forceHttps());
+
+// 2. Request ID for traceability
 app.use('*', requestId());
-app.use('*', cors({ origin: env.WEB_ORIGIN, credentials: true }));
+
+// 3. CORS — strict allowlist replacing the former wildcard
+app.use('*', corsMiddleware);
+
+// 4. Security headers — HSTS, CSP, X-Frame-Options, etc.
+app.use('*', securityHeaders());
+
 app.onError(onError);
 
-// Lockout middleware wraps better-auth sign-in to check/record lockout
+// ── Auth routes ───────────────────────────────────────────────────────────────
+// Rate-limit: 10 req/min/IP on all auth paths
+app.use('/api/auth/*', authIpRateLimit());
+// Lockout check wraps better-auth sign-in
 app.use('/api/auth/*', lockoutMiddleware);
 app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));
 
+// ── Health ────────────────────────────────────────────────────────────────────
 app.get('/healthz', (c) => c.json({ status: 'ok' }));
+
+// ── Authenticated API ─────────────────────────────────────────────────────────
+// Mutating rate-limit: 60 POST/PATCH/PUT/DELETE per minute per user
+app.use('/api/v1/*', mutatingRateLimit());
 
 app.get('/api/v1/me', requireAuth, (c) => c.json({ actor: c.get('actor') }));
 
