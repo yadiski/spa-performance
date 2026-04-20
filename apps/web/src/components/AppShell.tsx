@@ -1,5 +1,6 @@
 import { Link, Outlet } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
+import { NotificationBell } from './NotificationBell';
 
 type Section = { to: string; label: string };
 
@@ -30,8 +31,9 @@ export function AppShell({ children }: { children?: ReactNode }) {
         ))}
       </aside>
       <section>
-        <header className="h-14 border-b border-hairline bg-surface flex items-center px-6 text-xs text-ink-2">
-          FY 2026 · KRA drafting
+        <header className="h-14 border-b border-hairline bg-surface flex items-center justify-between px-6 text-xs text-ink-2">
+          <span>FY 2026 · KRA drafting</span>
+          <NotificationBell />
         </header>
         <main className="p-8">{children ?? <Outlet />}</main>
       </section>
