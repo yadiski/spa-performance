@@ -6,30 +6,38 @@ process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
 import { afterAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
-import { KraPerspective } from '@spa/shared';
+import { KraPerspective, NotificationKind } from '@spa/shared';
 import { eq, sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
+import * as queue from '../src/jobs/queue';
 import * as r2 from '../src/storage/r2';
 
 const FAKE_SHA256 = `aabbcc${'0'.repeat(58)}`;
 const putSpy = spyOn(r2, 'put').mockImplementation(async () => ({ sha256: FAKE_SHA256 }));
+const bossSendSpy = spyOn(queue.boss, 'send').mockImplementation(
+  async () => null as unknown as string,
+);
 
 import { runGeneratePmsPdf } from '../src/jobs/generate-pms-pdf';
 
 describe('runGeneratePmsPdf', () => {
   afterAll(() => {
     putSpy.mockRestore();
+    bossSendSpy.mockRestore();
   });
 
   let cycleId: string;
   let snapshotId: string;
+  let staffStaffId: string;
   const actorId = '00000000-0000-0000-0000-000000000001';
 
   beforeEach(async () => {
+    bossSendSpy.mockClear();
+
     const client = postgres(process.env.DATABASE_URL!, { max: 1 });
-    await client`truncate table audit_log`;
+    await client`truncate table notification, audit_log`;
     await client`truncate table cycle_amendment, pms_final_snapshot cascade`;
     await client`truncate table pms_comment, personal_growth, career_development, staff_contribution, behavioural_rating, pms_kra_rating, pms_assessment cascade`;
     await client`truncate table mid_year_checkpoint cascade`;
@@ -66,6 +74,7 @@ describe('runGeneratePmsPdf', () => {
         hireDate: '2022-01-01',
       })
       .returning();
+    staffStaffId = st!.id;
 
     const [cy] = await db
       .insert(s.performanceCycle)
@@ -131,5 +140,18 @@ describe('runGeneratePmsPdf', () => {
     ) as Array<{ event_type: string }>;
     expect(auditRows.length).toBe(1);
     expect(auditRows[0]?.event_type).toBe('pms.pdf.generated');
+  });
+
+  it('dispatches PmsPdfReady notification to appraisee', async () => {
+    await runGeneratePmsPdf(db, cycleId, snapshotId, actorId);
+
+    const notif = await db
+      .select()
+      .from(s.notification)
+      .where(
+        sql`recipient_staff_id = ${staffStaffId} and kind = ${NotificationKind.PmsPdfReady} and target_id = ${cycleId}`,
+      );
+    expect(notif.length).toBe(1);
+    expect(notif[0]?.payload).toMatchObject({ cycleId, snapshotId });
   });
 });

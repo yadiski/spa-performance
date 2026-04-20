@@ -1,5 +1,5 @@
 import type { FinalizePms, PmsCycleAction } from '@spa/shared';
-import { CycleState } from '@spa/shared';
+import { CycleState, NotificationKind } from '@spa/shared';
 import { eq, sql } from 'drizzle-orm';
 import { writeAudit } from '../../audit/log';
 import type { Actor } from '../../auth/middleware';
@@ -13,6 +13,8 @@ import {
 } from '../../db/schema';
 import { boss } from '../../jobs/queue';
 import { validate } from '../cycle/state-machine';
+import { dispatchNotifications } from '../notifications/dispatch';
+import { resolveCycleActors } from '../notifications/recipients';
 import { computeScore } from './scoring';
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -47,6 +49,8 @@ async function actorIsNextLevelOfCycleStaff(
   return row?.next_level === actor.staffId;
 }
 
+type RecipientRole = 'appraisee' | 'appraiser' | 'next_level' | 'hras';
+
 async function runTransition(
   db: DB,
   actor: Actor,
@@ -56,6 +60,8 @@ async function runTransition(
   ownershipCheck: 'self' | 'manager' | 'next_level' | 'hra' | 'none',
   payload: Record<string, unknown> = {},
   note?: string,
+  notificationKind?: NotificationKind,
+  notificationRecipientRole?: RecipientRole | RecipientRole[],
 ): Promise<Result> {
   return await db.transaction(async (tx) => {
     const [cycle] = await tx
@@ -101,6 +107,36 @@ async function runTransition(
       ip: actor.ip,
       ua: actor.ua,
     });
+
+    if (notificationKind && notificationRecipientRole) {
+      const actors = await resolveCycleActors(tx, cycleId);
+      const roles = Array.isArray(notificationRecipientRole)
+        ? notificationRecipientRole
+        : [notificationRecipientRole];
+      const recipientIds = new Set<string>();
+      for (const role of roles) {
+        if (role === 'appraisee' && actors.appraiseeStaffId) {
+          recipientIds.add(actors.appraiseeStaffId);
+        } else if (role === 'appraiser' && actors.appraiserStaffId) {
+          recipientIds.add(actors.appraiserStaffId);
+        } else if (role === 'next_level' && actors.nextLevelStaffId) {
+          recipientIds.add(actors.nextLevelStaffId);
+        } else if (role === 'hras') {
+          for (const id of actors.hraStaffIds) recipientIds.add(id);
+        }
+      }
+      const recipients = [...recipientIds].map((staffId) => ({ staffId }));
+      if (recipients.length > 0) {
+        await dispatchNotifications(tx, {
+          kind: notificationKind,
+          payload: { cycleId, fromState: cycle.state, toState: v.to, note: note ?? null },
+          recipients,
+          targetType: 'cycle',
+          targetId: cycleId,
+        });
+      }
+    }
+
     return { ok: true };
   });
 }
@@ -117,6 +153,10 @@ export async function submitSelfReview(
     'submit_self_review',
     'pms.self_review.submitted',
     'self',
+    {},
+    undefined,
+    NotificationKind.PmsSelfReviewSubmitted,
+    'appraiser',
   );
 }
 
@@ -132,6 +172,10 @@ export async function submitAppraiserRating(
     'submit_appraiser_rating',
     'pms.appraiser.submitted',
     'manager',
+    {},
+    undefined,
+    NotificationKind.PmsAppraiserSubmitted,
+    'next_level',
   );
 }
 
@@ -149,6 +193,8 @@ export async function returnToAppraisee(
     'manager',
     {},
     input.note,
+    NotificationKind.PmsReturnedToAppraisee,
+    'appraisee',
   );
 }
 
@@ -164,6 +210,10 @@ export async function submitNextLevel(
     'submit_next_level',
     'pms.next_level.submitted',
     'next_level',
+    {},
+    undefined,
+    NotificationKind.PmsNextLevelSubmitted,
+    'hras',
   );
 }
 
@@ -181,6 +231,8 @@ export async function returnToAppraiser(
     'next_level',
     {},
     input.note,
+    NotificationKind.PmsReturnedToAppraiser,
+    'appraiser',
   );
 }
 
@@ -266,6 +318,21 @@ export async function finalizePms(db: DB, actor: Actor, input: FinalizePms): Pro
       ip: actor.ip,
       ua: actor.ua,
     });
+
+    const actors = await resolveCycleActors(tx, cycle.id);
+    const recipients = [actors.appraiseeStaffId, actors.appraiserStaffId]
+      .filter((id): id is string => id !== null)
+      .map((staffId) => ({ staffId }));
+    if (recipients.length > 0) {
+      await dispatchNotifications(tx, {
+        kind: NotificationKind.PmsFinalized,
+        payload: { cycleId: cycle.id, fromState: cycle.state, toState: v.to },
+        recipients,
+        targetType: 'cycle',
+        targetId: cycle.id,
+      });
+    }
+
     return { ok: true } as Result;
   });
 
@@ -341,6 +408,21 @@ export async function reopenPms(
       ip: actor.ip,
       ua: actor.ua,
     });
+
+    const actors = await resolveCycleActors(tx, cycle.id);
+    const recipients = [actors.appraiseeStaffId, actors.appraiserStaffId, actors.nextLevelStaffId]
+      .filter((id): id is string => id !== null)
+      .map((staffId) => ({ staffId }));
+    if (recipients.length > 0) {
+      await dispatchNotifications(tx, {
+        kind: NotificationKind.PmsReopened,
+        payload: { cycleId: cycle.id, reason: input.reason },
+        recipients,
+        targetType: 'cycle',
+        targetId: cycle.id,
+      });
+    }
+
     return { ok: true };
   });
 }

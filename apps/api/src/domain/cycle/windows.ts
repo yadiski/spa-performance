@@ -1,10 +1,13 @@
 import type { OpenMidYearWindow, OpenPmsWindow } from '@spa/shared';
+import { NotificationKind } from '@spa/shared';
 import type { CycleState } from '@spa/shared';
 import { eq } from 'drizzle-orm';
 import { writeAudit } from '../../audit/log';
 import type { Actor } from '../../auth/middleware';
 import type { DB } from '../../db/client';
 import { approvalTransition, midYearCheckpoint, performanceCycle } from '../../db/schema';
+import { dispatchNotifications } from '../notifications/dispatch';
+import { resolveCycleActors } from '../notifications/recipients';
 import { validate } from './state-machine';
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -50,6 +53,18 @@ export async function openMidYearWindow(
       ip: actor.ip,
       ua: actor.ua,
     });
+
+    const actors = await resolveCycleActors(tx, cycle.id);
+    if (actors.appraiseeStaffId) {
+      await dispatchNotifications(tx, {
+        kind: NotificationKind.MidYearOpened,
+        payload: { cycleId: cycle.id, fromState: cycle.state, toState: v.to },
+        recipients: [{ staffId: actors.appraiseeStaffId }],
+        targetType: 'cycle',
+        targetId: cycle.id,
+      });
+    }
+
     return { ok: true };
   });
 }
