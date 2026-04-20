@@ -8,6 +8,7 @@ import type { Actor } from '../../auth/middleware';
 import { requireAuth } from '../../auth/middleware';
 import { db } from '../../db/client';
 import { department, performanceCycle, staff } from '../../db/schema';
+import { auditScopeViolation } from '../../rbac/audit-scope-violation';
 import { staffReadScope } from '../../rbac/scope';
 import { openMidYearWindow, openPmsWindow } from './windows';
 
@@ -158,6 +159,12 @@ const singleCycleSchema = z.object({ cycleId: z.string().uuid() });
 cycleRoutes.post('/open-pms-for-staff', zValidator('json', singleCycleSchema), async (c) => {
   const actor = c.get('actor');
   if (!actor.roles.includes('hra')) {
+    await auditScopeViolation(db, {
+      actor,
+      targetType: 'cycle',
+      targetId: c.req.valid('json').cycleId,
+      reason: 'hra-only: open-pms-for-staff',
+    });
     throw new HTTPException(403, { message: 'forbidden' });
   }
   const { cycleId } = c.req.valid('json');
@@ -170,6 +177,12 @@ cycleRoutes.post('/open-pms-for-staff', zValidator('json', singleCycleSchema), a
 cycleRoutes.post('/open-mid-year-for-staff', zValidator('json', singleCycleSchema), async (c) => {
   const actor = c.get('actor');
   if (!actor.roles.includes('hra')) {
+    await auditScopeViolation(db, {
+      actor,
+      targetType: 'cycle',
+      targetId: c.req.valid('json').cycleId,
+      reason: 'hra-only: open-mid-year-for-staff',
+    });
     throw new HTTPException(403, { message: 'forbidden' });
   }
   const { cycleId } = c.req.valid('json');
@@ -264,6 +277,12 @@ async function runBulk(
 cycleRoutes.post('/open-pms-bulk', zValidator('json', bulkScopeSchema), async (c) => {
   const actor = c.get('actor');
   if (!actor.roles.includes('hra')) {
+    await auditScopeViolation(db, {
+      actor,
+      targetType: 'cycle',
+      targetId: null,
+      reason: 'hra-only: open-pms-bulk',
+    });
     throw new HTTPException(403, { message: 'forbidden' });
   }
   const scope = c.req.valid('json');
@@ -276,6 +295,12 @@ cycleRoutes.post('/open-pms-bulk', zValidator('json', bulkScopeSchema), async (c
 cycleRoutes.post('/open-mid-year-bulk', zValidator('json', bulkScopeSchema), async (c) => {
   const actor = c.get('actor');
   if (!actor.roles.includes('hra')) {
+    await auditScopeViolation(db, {
+      actor,
+      targetType: 'cycle',
+      targetId: null,
+      reason: 'hra-only: open-mid-year-bulk',
+    });
     throw new HTTPException(403, { message: 'forbidden' });
   }
   const scope = c.req.valid('json');

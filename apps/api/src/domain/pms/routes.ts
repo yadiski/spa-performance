@@ -28,6 +28,7 @@ import {
   pmsKraRating,
   staffContribution,
 } from '../../db/schema';
+import { auditScopeViolation } from '../../rbac/audit-scope-violation';
 import { staffReadScope } from '../../rbac/scope';
 import { getSignedUrl } from '../../storage/r2';
 import { openPmsWindow as openPmsWindowSvc } from '../cycle/windows';
@@ -233,7 +234,15 @@ pmsRoutes.get('/:cycleId/state', async (c) => {
   const accessRows = Array.isArray(accessible)
     ? accessible
     : ((accessible as { rows?: unknown[] }).rows ?? []);
-  if (accessRows.length === 0) return c.json({ code: 'forbidden', message: 'forbidden' }, 403);
+  if (accessRows.length === 0) {
+    await auditScopeViolation(db, {
+      actor,
+      targetType: 'cycle',
+      targetId: cycleId,
+      reason: 'staffReadScope mismatch on pms state',
+    });
+    return c.json({ code: 'forbidden', message: 'forbidden' }, 403);
+  }
 
   // Load pms_assessment (may not exist yet)
   const [pms] = await db.select().from(pmsAssessment).where(eq(pmsAssessment.cycleId, cycleId));

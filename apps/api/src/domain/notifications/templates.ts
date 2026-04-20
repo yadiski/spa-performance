@@ -156,6 +156,19 @@ export function renderEmail(kind: NotificationKind, ctx: TemplateContext): Rende
       return { subject, text, html };
     }
 
+    case NotificationKind.ImpersonationStarted: {
+      const impersonatorName =
+        typeof ctx.impersonatorName === 'string' ? ctx.impersonatorName : 'An administrator';
+      const expiresAt = typeof ctx.expiresAt === 'string' ? ctx.expiresAt : 'soon';
+      const link = linkLine(ctx);
+      const subject = 'Administrator is accessing your account';
+      const text = `${impersonatorName} has started an impersonation session on your account. This session expires at ${expiresAt}. If this is unexpected, please contact IT support immediately.${link.text}`;
+      const html = baseHtml(
+        `<p><strong>${impersonatorName}</strong> has started an impersonation session on your account.</p><p>This session expires at <strong>${expiresAt}</strong>.</p><p>If this is unexpected, please contact IT support immediately.</p>${link.html}`,
+      );
+      return { subject, text, html };
+    }
+
     default: {
       // Exhaustiveness check — caught at compile time if a new kind is added without a case.
       const _exhaustive: never = kind;

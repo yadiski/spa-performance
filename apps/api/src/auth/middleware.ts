@@ -12,6 +12,7 @@ export type Actor = {
   email: string;
   ip: string | null;
   ua: string | null;
+  impersonating?: { targetUserId: string; sessionId: string };
 };
 
 declare module 'hono' {
