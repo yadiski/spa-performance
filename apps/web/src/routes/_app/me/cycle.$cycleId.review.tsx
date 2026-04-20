@@ -3,9 +3,11 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { aiApi } from '../../../api/ai';
 import { api } from '../../../api/client';
+import { dashboardsApi } from '../../../api/dashboards';
 import { pmsApi } from '../../../api/pms';
 import { StepperForm, type StepperStep } from '../../../components/StepperForm';
 import { AiPanel } from '../../../components/ai/AiPanel';
+import { TrajectoryBar } from '../../../components/dashboard/TrajectoryBar';
 
 export const Route = createFileRoute('/_app/me/cycle/$cycleId/review')({
   component: StaffSelfReview,
@@ -160,6 +162,14 @@ function StaffSelfReview() {
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
+  // Trajectory data from dashboards/me endpoint
+  const trajectoryQuery = useQuery({
+    queryKey: ['dashboards', 'me'],
+    queryFn: () => dashboardsApi.me(),
+    staleTime: 60_000,
+  });
+  const thisCycle = trajectoryQuery.data?.cycles.find((c) => c.id === cycleId);
+
   // KRA ratings local state: kraId → { resultAchieved, selfRating }
   const [kraRatings, setKraRatings] = useState<
     Record<string, { resultAchieved: string; selfRating: number }>
@@ -221,6 +231,19 @@ function StaffSelfReview() {
     return (
       <div className="p-8 max-w-2xl space-y-4">
         <h1 className="text-lg font-semibold">Self-review — FY {state.cycle.fy}</h1>
+
+        {/* Trajectory widget (June → now) */}
+        {thisCycle && (thisCycle.trajectoryJune != null || thisCycle.trajectoryNow != null) && (
+          <div className="bg-surface border border-hairline rounded-md p-4 space-y-2">
+            <div className="text-xs uppercase tracking-wider text-ink-2">Rating trajectory</div>
+            <div className="border-t border-hairline" />
+            <TrajectoryBar
+              june={thisCycle.trajectoryJune}
+              current={thisCycle.trajectoryNow}
+              max={5}
+            />
+          </div>
+        )}
         {cycleState === 'pms_finalized' && (
           <AiPanel
             title="Performance Summary"
@@ -353,11 +376,24 @@ function StaffSelfReview() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="shrink-0 px-8 py-5 border-b border-hairline bg-surface">
-        <h1 className="text-base font-semibold">Self-review — FY {state.cycle.fy}</h1>
-        <p className="text-xs text-ink-2 mt-0.5">
-          Complete all steps and submit for appraiser review.
-        </p>
+      <div className="shrink-0 px-8 py-5 border-b border-hairline bg-surface space-y-3">
+        <div>
+          <h1 className="text-base font-semibold">Self-review — FY {state.cycle.fy}</h1>
+          <p className="text-xs text-ink-2 mt-0.5">
+            Complete all steps and submit for appraiser review.
+          </p>
+        </div>
+        {/* Trajectory widget */}
+        {thisCycle && (thisCycle.trajectoryJune != null || thisCycle.trajectoryNow != null) && (
+          <div className="max-w-xs">
+            <div className="text-xs text-ink-2 mb-1">Rating trajectory (June → now)</div>
+            <TrajectoryBar
+              june={thisCycle.trajectoryJune}
+              current={thisCycle.trajectoryNow}
+              max={5}
+            />
+          </div>
+        )}
       </div>
       <div className="flex-1 min-h-0">
         <StepperForm steps={steps} onComplete={handleComplete} submitLabel="Submit self-review" />
