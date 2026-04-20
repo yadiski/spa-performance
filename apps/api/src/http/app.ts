@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { requestId } from 'hono/request-id';
+import { aiRoutes } from '../ai/routes';
 import { auth } from '../auth/better-auth';
 import { requireAuth } from '../auth/middleware';
 import { cycleRoutes } from '../domain/cycle/routes';
@@ -32,3 +33,4 @@ app.route('/api/v1/staff', staffRoutes);
 app.route('/api/v1/mid-year', midYearRoutes);
 app.route('/api/v1/pms', pmsRoutes);
 app.route('/api/v1/notifications', notificationRoutes);
+app.route('/api/v1/ai', aiRoutes);

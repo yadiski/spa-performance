@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { aiApi } from '../../../api/ai';
 import { api } from '../../../api/client';
 import { type BehaviouralDimensionItem, pmsApi } from '../../../api/pms';
 import { BehaviouralAnchor } from '../../../components/BehaviouralAnchor';
 import { StepperForm, type StepperStep } from '../../../components/StepperForm';
+import { AiPanel } from '../../../components/ai/AiPanel';
 
 export const Route = createFileRoute('/_app/team/cycle/$cycleId/review')({
   component: AppraiserReview,
@@ -617,12 +619,61 @@ function AppraiserReview() {
       title: 'Part V — Career &amp; Growth',
       description: 'Development planning',
       content: (
-        <CareerGrowthStep
-          career={career}
-          growth={growth}
-          onCareerChange={(field, value) => setCareer((prev) => ({ ...prev, [field]: value }))}
-          onGrowthChange={(field, value) => setGrowth((prev) => ({ ...prev, [field]: value }))}
-        />
+        <div className="space-y-4">
+          <AiPanel
+            title="Development Recommendations"
+            queryKey={['ai', 'dev-recommendations', cycleId]}
+            queryFn={() => aiApi.devRecommendations(cycleId).then((r) => r.output)}
+          >
+            {(output) => (
+              <div className="space-y-2 text-sm">
+                {output.training.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">Training</div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                      {output.training.map((t, i) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                        <li key={i}>{t}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {output.stretch.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                      Stretch assignments
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                      {output.stretch.map((s, i) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {output.mentorship.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                      Mentorship
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-ink">
+                      {output.mentorship.map((m, i) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                        <li key={i}>{m}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </AiPanel>
+          <CareerGrowthStep
+            career={career}
+            growth={growth}
+            onCareerChange={(field, value) => setCareer((prev) => ({ ...prev, [field]: value }))}
+            onGrowthChange={(field, value) => setGrowth((prev) => ({ ...prev, [field]: value }))}
+          />
+        </div>
       ),
       canAdvance: () => career.potentialWindow.length > 0,
     },

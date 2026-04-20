@@ -2,7 +2,10 @@ import { type KraDraft, KraPerspective, kraCreateBatch } from '@spa/shared';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import { aiApi } from '../../../api/ai';
 import { api } from '../../../api/client';
+import { AiPanel } from '../../../components/ai/AiPanel';
 
 export const Route = createFileRoute('/_app/me/kra')({ component: KraForm });
 
@@ -18,16 +21,28 @@ const emptyKra = (order: number): KraDraft => ({
 
 function KraForm() {
   const qc = useQueryClient();
+  const [qualityOpen, setQualityOpen] = useState<Record<number, boolean>>({});
   const cycle = useQuery({
     queryKey: ['cycle', 'current'],
     queryFn: () =>
       api<{ cycle: { id: string; fy: number; state: string } | null }>('/api/v1/cycle/current'),
   });
 
+  // Load saved KRAs so we can show "Check quality" with real IDs
+  const savedKras = useQuery({
+    queryKey: ['kras', cycle.data?.cycle?.id],
+    queryFn: () =>
+      api<{ kras: Array<{ id: string; order: number }> }>(`/api/v1/kra/${cycle.data!.cycle!.id}`),
+    enabled: !!cycle.data?.cycle?.id,
+  });
+
   const save = useMutation({
     mutationFn: (body: unknown) =>
       api('/api/v1/kra/draft', { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cycle'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cycle'] });
+      qc.invalidateQueries({ queryKey: ['kras', cycle.data?.cycle?.id] });
+    },
   });
 
   const submit = useMutation({
@@ -49,6 +64,12 @@ function KraForm() {
   const kras = form.useStore((state) => state.values.kras);
   const totalWeight = kras.reduce((s, k) => s + (k.weightPct ?? 0), 0);
   const valid = totalWeight === 100;
+
+  // Map saved KRA index → id
+  const kraIdByOrder: Record<number, string> = {};
+  for (const k of savedKras.data?.kras ?? []) {
+    kraIdByOrder[k.order] = k.id;
+  }
 
   if (!cycle.data?.cycle) {
     return <div className="text-xs text-ink-2">No active cycle.</div>;
@@ -156,6 +177,78 @@ function KraForm() {
                       </form.Field>
                     ))}
                   </div>
+
+                  {/* Check quality button — only available once KRA has a server ID */}
+                  {kraIdByOrder[i] && (
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setQualityOpen((prev) => ({ ...prev, [i]: !prev[i] }))}
+                        className="text-xs border border-hairline rounded-sm px-2 py-1 hover:bg-canvas text-ink-2 hover:text-ink"
+                      >
+                        {qualityOpen[i] ? 'Hide quality check' : 'Check quality'}
+                      </button>
+                      {qualityOpen[i] &&
+                        (() => {
+                          const savedKraId = kraIdByOrder[i] as string;
+                          return (
+                            <div className="mt-2">
+                              <AiPanel
+                                title="KRA Quality Check"
+                                queryKey={['ai', 'kra-quality', savedKraId]}
+                                queryFn={() => aiApi.kraQuality(savedKraId).then((r) => r.output)}
+                                onRegenerate={() =>
+                                  setQualityOpen((prev) => ({ ...prev, [i]: true }))
+                                }
+                              >
+                                {(output) => (
+                                  <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-ink-2">SMART score</span>
+                                      <div className="flex-1 h-1.5 bg-canvas rounded-full overflow-hidden border border-hairline">
+                                        <div
+                                          className="h-full bg-ink rounded-full"
+                                          style={{ width: `${output.smart_score}%` }}
+                                        />
+                                      </div>
+                                      <span className="text-xs font-medium text-ink tabular-nums">
+                                        {output.smart_score}/100
+                                      </span>
+                                    </div>
+                                    {output.issues.length > 0 && (
+                                      <div>
+                                        <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                                          Issues
+                                        </div>
+                                        <ul className="list-disc pl-4 space-y-0.5 text-ink text-xs">
+                                          {output.issues.map((issue, j) => (
+                                            // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated string list has no stable id
+                                            <li key={j}>{issue}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {output.suggested_rewrite && (
+                                      <div>
+                                        <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                                          Suggested rewrite
+                                        </div>
+                                        <textarea
+                                          readOnly
+                                          value={output.suggested_rewrite}
+                                          rows={3}
+                                          className="block w-full text-xs border border-hairline rounded-sm p-2 bg-canvas text-ink"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </AiPanel>
+                            </div>
+                          );
+                        })()}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -3,7 +3,9 @@ import { useForm } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import { aiApi } from '../../../api/ai';
 import { api } from '../../../api/client';
+import { AiPanel } from '../../../components/ai/AiPanel';
 
 export const Route = createFileRoute('/_app/me/mid-year')({ component: MidYearForm });
 
@@ -67,10 +69,57 @@ function MidYearForm() {
   });
 
   if (!cycle.data?.cycle) return <div className="text-xs text-ink-2">No active cycle.</div>;
-  if (cycle.data.cycle.state !== 'mid_year_open') {
+
+  const cycleState = cycle.data.cycle.state;
+  const MID_YEAR_SUBMITTED_STATES = new Set([
+    'mid_year_submitted',
+    'mid_year_done',
+    'pms_self_review',
+    'pms_awaiting_appraiser',
+    'pms_awaiting_next_lvl',
+    'pms_awaiting_hra',
+    'pms_finalized',
+  ]);
+
+  if (cycleState !== 'mid_year_open') {
     return (
-      <div className="text-xs text-ink-2">
-        Mid-year window is not currently open. Current cycle state: {cycle.data.cycle.state}
+      <div className="max-w-2xl space-y-4 p-4">
+        {MID_YEAR_SUBMITTED_STATES.has(cycleState) && (
+          <AiPanel
+            title="Mid-year Nudges"
+            queryKey={['ai', 'mid-year-nudges', cycle.data.cycle.id]}
+            queryFn={() => aiApi.midYearNudges(cycle.data!.cycle!.id).then((r) => r.output)}
+          >
+            {(output) => (
+              <div className="space-y-3 text-sm">
+                {output.per_kra_nudge.length > 0 && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                      Per-KRA nudges
+                    </div>
+                    <ul className="list-disc pl-4 space-y-1 text-ink">
+                      {output.per_kra_nudge.map((n, i) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: AI-generated list; kra_id may not be unique across runs
+                        <li key={i}>{n.nudge}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {output.overall_focus && (
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-ink-2 mb-1">
+                      Overall focus
+                    </div>
+                    <p className="text-ink">{output.overall_focus}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </AiPanel>
+        )}
+        <div className="text-xs text-ink-2">
+          Mid-year window is not currently open. Current cycle state: {cycleState}
+        </div>
       </div>
     );
   }
