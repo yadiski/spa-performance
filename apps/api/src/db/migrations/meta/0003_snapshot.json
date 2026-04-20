@@ -47,12 +47,8 @@
           "name": "department_org_id_organization_id_fk",
           "tableFrom": "department",
           "tableTo": "organization",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -106,12 +102,8 @@
           "name": "grade_org_id_organization_id_fk",
           "tableFrom": "grade",
           "tableTo": "organization",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -225,12 +217,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -303,12 +291,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -318,9 +302,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -370,12 +352,8 @@
           "name": "two_factor_user_id_user_id_fk",
           "tableFrom": "two_factor",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -451,9 +429,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -597,12 +573,8 @@
           "name": "staff_user_id_user_id_fk",
           "tableFrom": "staff",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -610,12 +582,8 @@
           "name": "staff_org_id_organization_id_fk",
           "tableFrom": "staff",
           "tableTo": "organization",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -623,12 +591,8 @@
           "name": "staff_department_id_department_id_fk",
           "tableFrom": "staff",
           "tableTo": "department",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -636,12 +600,8 @@
           "name": "staff_grade_id_grade_id_fk",
           "tableFrom": "staff",
           "tableTo": "grade",
-          "columnsFrom": [
-            "grade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["grade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -649,12 +609,8 @@
           "name": "staff_manager_id_staff_id_fk",
           "tableFrom": "staff",
           "tableTo": "staff",
-          "columnsFrom": [
-            "manager_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["manager_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -664,16 +620,12 @@
         "staff_user_id_unique": {
           "name": "staff_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         },
         "staff_employee_no_unique": {
           "name": "staff_employee_no_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "employee_no"
-          ]
+          "columns": ["employee_no"]
         }
       },
       "policies": {},
@@ -718,12 +670,8 @@
           "name": "staff_role_staff_id_staff_id_fk",
           "tableFrom": "staff_role",
           "tableTo": "staff",
-          "columnsFrom": [
-            "staff_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["staff_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ZodError } from 'zod';
+import { errorClient } from '../observability/errors';
 
 export type ApiError = {
   code: string;
@@ -25,7 +26,13 @@ export function onError(err: unknown, c: Context): Response {
       400,
     );
   }
-  console.error('unhandled error', err);
+  // Capture unhandled errors via the pluggable error client (Sentry or fallback)
+  const actor = c.get('actor') as { id?: string } | undefined;
+  const userId = actor?.id;
+  errorClient.captureException(err, {
+    ...(requestId !== undefined ? { requestId } : {}),
+    ...(userId !== undefined ? { userId } : {}),
+  });
   return c.json<ApiError>(
     { code: 'internal_error', message: 'Internal server error', requestId },
     500,

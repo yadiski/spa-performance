@@ -31,8 +31,12 @@ export async function renderPmsPdf(db: DB, cycleId: string): Promise<Uint8Array>
   const [st] = await db.select().from(staff).where(eq(staff.id, cy.staffId));
   if (!st) throw new Error('staff_not_found');
   const [org] = await db.select().from(organization).where(eq(organization.id, st.orgId));
-  const [dept] = await db.select().from(department).where(eq(department.id, st.departmentId));
-  const [gr] = await db.select().from(grade).where(eq(grade.id, st.gradeId));
+  const [dept] = st.departmentId
+    ? await db.select().from(department).where(eq(department.id, st.departmentId))
+    : [undefined];
+  const [gr] = st.gradeId
+    ? await db.select().from(grade).where(eq(grade.id, st.gradeId))
+    : [undefined];
 
   // Superior: direct manager
   let superiorName: string | null = null;

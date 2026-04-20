@@ -240,6 +240,8 @@ dashboardRoutes.get('/dept', async (c) => {
 
   const { departmentId, orgId } = actorStaff;
 
+  if (!departmentId) throw new HTTPException(403, { message: 'forbidden' });
+
   // Department info
   const [deptInfo] = await db
     .select({ id: department.id, name: department.name })

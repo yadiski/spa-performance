@@ -1,5 +1,5 @@
+import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { requestId } from 'hono/request-id';
 import { aiRoutes } from '../ai/routes';
 import { auditRoutes } from '../audit/routes';
 import { authAdminRoutes } from '../auth/admin-routes';
@@ -19,10 +19,12 @@ import { staffRoutes } from '../domain/staff/routes';
 import { loadEnv } from '../env';
 import { exportRoutes } from '../exports/routes';
 import { searchRoutes } from '../search/routes';
+import { isConfigured as r2IsConfigured } from '../storage/r2';
 import { corsMiddleware } from './cors';
 import { onError } from './error';
 import { forceHttps } from './force-https';
 import { authIpRateLimit, mutatingRateLimit } from './rate-limit';
+import { requestIdMiddleware } from './request-id';
 import { securityHeaders } from './security-headers';
 
 const env = loadEnv();
@@ -35,8 +37,8 @@ export const app = new Hono();
 // 1. TLS enforcement — redirect http → https in production
 app.use('*', forceHttps());
 
-// 2. Request ID for traceability
-app.use('*', requestId());
+// 2. Request ID for traceability + structured request logging
+app.use('*', requestIdMiddleware);
 
 // 3. CORS — strict allowlist replacing the former wildcard
 app.use('*', corsMiddleware);
@@ -55,6 +57,28 @@ app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));
 
 // ── Health ────────────────────────────────────────────────────────────────────
 app.get('/healthz', (c) => c.json({ status: 'ok' }));
+
+app.get('/api/v1/healthz/deep', async (c) => {
+  const token = c.req.header('x-health-token');
+  if (!token || token !== process.env.HEALTH_CHECK_TOKEN) {
+    return c.json({ error: 'unauthorized' }, 401);
+  }
+
+  // Check DB connectivity
+  let dbStatus = 'ok';
+  try {
+    const { db } = await import('../db/client');
+    await db.execute(sql`select 1`);
+  } catch {
+    dbStatus = 'error';
+  }
+
+  return c.json({
+    db: dbStatus,
+    r2: r2IsConfigured() ? 'ok' : 'unconfigured',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // ── Authenticated API ─────────────────────────────────────────────────────────
 // Mutating rate-limit: 60 POST/PATCH/PUT/DELETE per minute per user

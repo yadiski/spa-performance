@@ -16,6 +16,10 @@ const schema = z.object({
   OPENROUTER_API_KEY: z.string().optional(),
   /** Comma-separated list of additional allowed CORS origins (e.g. staging front-ends). */
   ADDITIONAL_CORS_ORIGINS: z.string().optional(),
+  /** Sentry DSN — optional; when set wire up @sentry/bun in index.ts. */
+  SENTRY_DSN: z.string().optional(),
+  /** Shared secret for /api/v1/healthz/deep — pass via X-Health-Token header. */
+  HEALTH_CHECK_TOKEN: z.string().optional(),
 });
 export type Env = z.infer<typeof schema>;
 

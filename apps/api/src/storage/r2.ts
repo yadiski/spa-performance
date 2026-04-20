@@ -1,5 +1,10 @@
 import { createHash } from 'node:crypto';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl as awsGetSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 function getClient(): S3Client {
@@ -51,6 +56,28 @@ export async function getSignedUrl(key: string, ttlSec = 86400): Promise<string>
   return awsGetSignedUrl(c, new GetObjectCommand({ Bucket: bucket, Key: key }), {
     expiresIn: ttlSec,
   });
+}
+
+/**
+ * Returns true when all four R2 env vars are present.
+ * Use this for health-check and optional deletion guards.
+ */
+export function isConfigured(): boolean {
+  return !!(
+    process.env.R2_ACCOUNT_ID &&
+    process.env.R2_ACCESS_KEY_ID &&
+    process.env.R2_SECRET_ACCESS_KEY &&
+    process.env.R2_BUCKET
+  );
+}
+
+/**
+ * Deletes an object from R2. No-ops gracefully if the key doesn't exist.
+ */
+export async function del(key: string): Promise<void> {
+  const c = getClient();
+  const bucket = process.env.R2_BUCKET!;
+  await c.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
 }
 
 export async function get(key: string): Promise<Buffer> {
