@@ -14,6 +14,8 @@ const schema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET: z.string().optional(),
   OPENROUTER_API_KEY: z.string().optional(),
+  /** Comma-separated list of additional allowed CORS origins (e.g. staging front-ends). */
+  ADDITIONAL_CORS_ORIGINS: z.string().optional(),
 });
 export type Env = z.infer<typeof schema>;
 
