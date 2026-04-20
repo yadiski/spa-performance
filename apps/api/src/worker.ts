@@ -6,6 +6,7 @@ import { runDailyAuditAnchor } from './jobs/daily-audit-anchor';
 import { runGeneratePmsPdf } from './jobs/generate-pms-pdf';
 import type { GenerateXlsxJob } from './jobs/generate-xlsx';
 import { runGenerateXlsx } from './jobs/generate-xlsx';
+import { runQuarterlyAccessReview } from './jobs/quarterly-access-review';
 import { boss, startBoss } from './jobs/queue';
 import { runRetentionAiCache } from './jobs/retention-ai-cache';
 import { runRetentionAuth } from './jobs/retention-auth';
@@ -26,6 +27,7 @@ const RETENTION_EXPORTS_QUEUE = 'retention.exports';
 const RETENTION_AI_CACHE_QUEUE = 'retention.ai_cache';
 const RETENTION_PERFORMANCE_QUEUE = 'retention.performance';
 const RETENTION_STAFF_QUEUE = 'retention.terminated_staff';
+const ACCESS_REVIEW_QUEUE = 'compliance.access_review';
 
 await startBoss();
 // pg-boss v10: queues must exist before schedule() or work() can reference them.
@@ -114,6 +116,14 @@ await boss.work(RETENTION_STAFF_QUEUE, async () => {
 });
 await boss.schedule(RETENTION_STAFF_QUEUE, '0 6 * * 0'); // 06:00 UTC every Sunday
 
+// ── Quarterly access review ───────────────────────────────────────────────────
+// cron: 0 0 1 1,4,7,10 * — 1st of Jan/Apr/Jul/Oct at 00:00 UTC
+await boss.createQueue(ACCESS_REVIEW_QUEUE);
+await boss.work(ACCESS_REVIEW_QUEUE, async () => {
+  await runQuarterlyAccessReview();
+});
+await boss.schedule(ACCESS_REVIEW_QUEUE, '0 0 1 1,4,7,10 *');
+
 console.log(
   'worker ready — queues:',
   ANCHOR_QUEUE,
@@ -128,4 +138,5 @@ console.log(
   RETENTION_AI_CACHE_QUEUE,
   RETENTION_PERFORMANCE_QUEUE,
   RETENTION_STAFF_QUEUE,
+  ACCESS_REVIEW_QUEUE,
 );

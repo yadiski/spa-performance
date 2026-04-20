@@ -9,6 +9,7 @@ import { lockoutMiddleware } from '../auth/lockout-middleware';
 import { mfaRecoveryRoutes } from '../auth/mfa-recovery-routes';
 import { requireAuth } from '../auth/middleware';
 import { adminSessionRoutes, sessionRoutes } from '../auth/session-routes';
+import { accessReviewRoutes } from '../compliance/routes';
 import { dashboardRoutes } from '../dashboards/routes';
 import { cycleRoutes } from '../domain/cycle/routes';
 import { kraRoutes } from '../domain/kra/routes';
@@ -18,6 +19,7 @@ import { pmsRoutes } from '../domain/pms/routes';
 import { staffRoutes } from '../domain/staff/routes';
 import { loadEnv } from '../env';
 import { exportRoutes } from '../exports/routes';
+import { onboardingRoutes } from '../onboarding/routes';
 import { searchRoutes } from '../search/routes';
 import { isConfigured as r2IsConfigured } from '../storage/r2';
 import { corsMiddleware } from './cors';
@@ -103,3 +105,7 @@ app.route('/api/v1/auth', mfaRecoveryRoutes);
 app.route('/api/v1/admin/auth', authAdminRoutes);
 app.route('/api/v1/admin/auth', adminSessionRoutes);
 app.route('/api/v1/admin/impersonation', impersonationRoutes);
+// Phase 4.9 — Onboarding + first-run
+app.route('/api/v1/onboarding', onboardingRoutes);
+// Phase 4.10 — Access reviews
+app.route('/api/v1/admin/access-review', accessReviewRoutes);

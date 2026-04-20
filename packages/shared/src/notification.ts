@@ -14,6 +14,12 @@ export const NotificationKind = {
   PmsPdfReady: 'pms.pdf.ready',
   ExportReady: 'export.ready',
   ImpersonationStarted: 'impersonation.started',
+  // Onboarding
+  InviteUser: 'onboarding.invite',
+  WelcomeUser: 'onboarding.welcome',
+  PasswordReset: 'onboarding.password_reset',
+  // Access review
+  AccessReviewGenerated: 'access_review.generated',
 } as const;
 export type NotificationKind = (typeof NotificationKind)[keyof typeof NotificationKind];
 
@@ -31,6 +37,10 @@ export const notificationKindSchema = z.enum([
   'pms.pdf.ready',
   'export.ready',
   'impersonation.started',
+  'onboarding.invite',
+  'onboarding.welcome',
+  'onboarding.password_reset',
+  'access_review.generated',
 ]);
 
 export const notificationPayloadSchema = z.record(z.string(), z.unknown());
