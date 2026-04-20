@@ -47,12 +47,8 @@
           "name": "department_org_id_organization_id_fk",
           "tableFrom": "department",
           "tableTo": "organization",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -106,12 +102,8 @@
           "name": "grade_org_id_organization_id_fk",
           "tableFrom": "grade",
           "tableTo": "organization",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -225,12 +217,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -303,12 +291,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -318,9 +302,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -370,12 +352,8 @@
           "name": "two_factor_user_id_user_id_fk",
           "tableFrom": "two_factor",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -451,9 +429,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -597,12 +573,8 @@
           "name": "staff_user_id_user_id_fk",
           "tableFrom": "staff",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -610,12 +582,8 @@
           "name": "staff_org_id_organization_id_fk",
           "tableFrom": "staff",
           "tableTo": "organization",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["org_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -623,12 +591,8 @@
           "name": "staff_department_id_department_id_fk",
           "tableFrom": "staff",
           "tableTo": "department",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -636,12 +600,8 @@
           "name": "staff_grade_id_grade_id_fk",
           "tableFrom": "staff",
           "tableTo": "grade",
-          "columnsFrom": [
-            "grade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["grade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -649,12 +609,8 @@
           "name": "staff_manager_id_staff_id_fk",
           "tableFrom": "staff",
           "tableTo": "staff",
-          "columnsFrom": [
-            "manager_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["manager_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -664,16 +620,12 @@
         "staff_user_id_unique": {
           "name": "staff_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         },
         "staff_employee_no_unique": {
           "name": "staff_employee_no_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "employee_no"
-          ]
+          "columns": ["employee_no"]
         }
       },
       "policies": {},
@@ -718,12 +670,8 @@
           "name": "staff_role_staff_id_staff_id_fk",
           "tableFrom": "staff_role",
           "tableTo": "staff",
-          "columnsFrom": [
-            "staff_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["staff_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -908,12 +856,8 @@
           "name": "approval_transition_cycle_id_performance_cycle_id_fk",
           "tableFrom": "approval_transition",
           "tableTo": "performance_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cycle_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -994,12 +938,8 @@
           "name": "performance_cycle_staff_id_staff_id_fk",
           "tableFrom": "performance_cycle",
           "tableTo": "staff",
-          "columnsFrom": [
-            "staff_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["staff_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1091,12 +1031,8 @@
           "name": "kra_cycle_id_performance_cycle_id_fk",
           "tableFrom": "kra",
           "tableTo": "performance_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cycle_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1156,12 +1092,8 @@
           "name": "kra_progress_update_kra_id_kra_id_fk",
           "tableFrom": "kra_progress_update",
           "tableTo": "kra",
-          "columnsFrom": [
-            "kra_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["kra_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1235,9 +1167,7 @@
         "behavioural_dimension_code_unique": {
           "name": "behavioural_dimension_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -1318,12 +1248,8 @@
           "name": "mid_year_checkpoint_cycle_id_performance_cycle_id_fk",
           "tableFrom": "mid_year_checkpoint",
           "tableTo": "performance_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cycle_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1333,9 +1259,7 @@
         "mid_year_checkpoint_cycle_id_unique": {
           "name": "mid_year_checkpoint_cycle_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "cycle_id"
-          ]
+          "columns": ["cycle_id"]
         }
       },
       "policies": {},
@@ -1397,12 +1321,8 @@
           "name": "behavioural_rating_pms_id_pms_assessment_id_fk",
           "tableFrom": "behavioural_rating",
           "tableTo": "pms_assessment",
-          "columnsFrom": [
-            "pms_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pms_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1469,12 +1389,8 @@
           "name": "career_development_pms_id_pms_assessment_id_fk",
           "tableFrom": "career_development",
           "tableTo": "pms_assessment",
-          "columnsFrom": [
-            "pms_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pms_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1484,9 +1400,7 @@
         "career_development_pms_id_unique": {
           "name": "career_development_pms_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "pms_id"
-          ]
+          "columns": ["pms_id"]
         }
       },
       "policies": {},
@@ -1548,12 +1462,8 @@
           "name": "cycle_amendment_original_cycle_id_performance_cycle_id_fk",
           "tableFrom": "cycle_amendment",
           "tableTo": "performance_cycle",
-          "columnsFrom": [
-            "original_cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["original_cycle_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1561,12 +1471,8 @@
           "name": "cycle_amendment_original_snapshot_id_pms_final_snapshot_id_fk",
           "tableFrom": "cycle_amendment",
           "tableTo": "pms_final_snapshot",
-          "columnsFrom": [
-            "original_snapshot_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["original_snapshot_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1627,12 +1533,8 @@
           "name": "personal_growth_pms_id_pms_assessment_id_fk",
           "tableFrom": "personal_growth",
           "tableTo": "pms_assessment",
-          "columnsFrom": [
-            "pms_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pms_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1642,9 +1544,7 @@
         "personal_growth_pms_id_unique": {
           "name": "personal_growth_pms_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "pms_id"
-          ]
+          "columns": ["pms_id"]
         }
       },
       "policies": {},
@@ -1689,12 +1589,8 @@
           "name": "pms_assessment_cycle_id_performance_cycle_id_fk",
           "tableFrom": "pms_assessment",
           "tableTo": "performance_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cycle_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1704,9 +1600,7 @@
         "pms_assessment_cycle_id_unique": {
           "name": "pms_assessment_cycle_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "cycle_id"
-          ]
+          "columns": ["cycle_id"]
         }
       },
       "policies": {},
@@ -1793,12 +1687,8 @@
           "name": "pms_comment_pms_id_pms_assessment_id_fk",
           "tableFrom": "pms_comment",
           "tableTo": "pms_assessment",
-          "columnsFrom": [
-            "pms_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pms_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1806,12 +1696,8 @@
           "name": "pms_comment_signed_by_user_id_fk",
           "tableFrom": "pms_comment",
           "tableTo": "user",
-          "columnsFrom": [
-            "signed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["signed_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1895,12 +1781,8 @@
           "name": "pms_final_snapshot_pms_id_pms_assessment_id_fk",
           "tableFrom": "pms_final_snapshot",
           "tableTo": "pms_assessment",
-          "columnsFrom": [
-            "pms_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pms_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1908,12 +1790,8 @@
           "name": "pms_final_snapshot_amendment_of_snapshot_id_pms_final_snapshot_id_fk",
           "tableFrom": "pms_final_snapshot",
           "tableTo": "pms_final_snapshot",
-          "columnsFrom": [
-            "amendment_of_snapshot_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["amendment_of_snapshot_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1986,12 +1864,8 @@
           "name": "pms_kra_rating_pms_id_pms_assessment_id_fk",
           "tableFrom": "pms_kra_rating",
           "tableTo": "pms_assessment",
-          "columnsFrom": [
-            "pms_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pms_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1999,12 +1873,8 @@
           "name": "pms_kra_rating_kra_id_kra_id_fk",
           "tableFrom": "pms_kra_rating",
           "tableTo": "kra",
-          "columnsFrom": [
-            "kra_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["kra_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2064,12 +1934,8 @@
           "name": "staff_contribution_pms_id_pms_assessment_id_fk",
           "tableFrom": "staff_contribution",
           "tableTo": "pms_assessment",
-          "columnsFrom": [
-            "pms_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pms_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2169,12 +2035,8 @@
           "name": "notification_recipient_staff_id_staff_id_fk",
           "tableFrom": "notification",
           "tableTo": "staff",
-          "columnsFrom": [
-            "recipient_staff_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["recipient_staff_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2220,21 +2082,12 @@
     "public.kra_perspective": {
       "name": "kra_perspective",
       "schema": "public",
-      "values": [
-        "financial",
-        "customer",
-        "internal_process",
-        "learning_growth"
-      ]
+      "values": ["financial", "customer", "internal_process", "learning_growth"]
     },
     "public.pms_comment_role": {
       "name": "pms_comment_role",
       "schema": "public",
-      "values": [
-        "appraiser",
-        "appraisee",
-        "next_level"
-      ]
+      "values": ["appraiser", "appraisee", "next_level"]
     }
   },
   "schemas": {},

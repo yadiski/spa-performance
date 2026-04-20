@@ -7,6 +7,11 @@ import { runGeneratePmsPdf } from './jobs/generate-pms-pdf';
 import type { GenerateXlsxJob } from './jobs/generate-xlsx';
 import { runGenerateXlsx } from './jobs/generate-xlsx';
 import { boss, startBoss } from './jobs/queue';
+import { runRetentionAiCache } from './jobs/retention-ai-cache';
+import { runRetentionAuth } from './jobs/retention-auth';
+import { runRetentionExports } from './jobs/retention-exports';
+import { runRetentionPerformance } from './jobs/retention-performance';
+import { runRetentionTerminatedStaff } from './jobs/retention-terminated-staff';
 import type { SendEmailJob } from './jobs/send-email';
 import { runSendEmail } from './jobs/send-email';
 
@@ -16,6 +21,11 @@ const ARCHIVE_QUEUE = 'audit.archive';
 const PDF_QUEUE = 'pms.generate_pdf';
 const EMAIL_QUEUE = 'notifications.send_email';
 const XLSX_QUEUE = 'exports.generate_xlsx';
+const RETENTION_AUTH_QUEUE = 'retention.auth';
+const RETENTION_EXPORTS_QUEUE = 'retention.exports';
+const RETENTION_AI_CACHE_QUEUE = 'retention.ai_cache';
+const RETENTION_PERFORMANCE_QUEUE = 'retention.performance';
+const RETENTION_STAFF_QUEUE = 'retention.terminated_staff';
 
 await startBoss();
 // pg-boss v10: queues must exist before schedule() or work() can reference them.
@@ -68,6 +78,42 @@ await boss.work(REFRESH_QUEUE, async () => {
 });
 await boss.schedule(REFRESH_QUEUE, '*/10 * * * *');
 
+// ── Retention jobs ────────────────────────────────────────────────────────────
+// auth: daily — 90-day hot window is relatively short
+await boss.createQueue(RETENTION_AUTH_QUEUE);
+await boss.work(RETENTION_AUTH_QUEUE, async () => {
+  await runRetentionAuth(db);
+});
+await boss.schedule(RETENTION_AUTH_QUEUE, '0 3 * * *'); // 03:00 UTC daily
+
+// exports: daily — 1-year window; mark old files as expired + delete R2 object
+await boss.createQueue(RETENTION_EXPORTS_QUEUE);
+await boss.work(RETENTION_EXPORTS_QUEUE, async () => {
+  await runRetentionExports(db);
+});
+await boss.schedule(RETENTION_EXPORTS_QUEUE, '30 3 * * *'); // 03:30 UTC daily
+
+// ai-cache: monthly — 7-year window; won't meaningfully fire until ~2033
+await boss.createQueue(RETENTION_AI_CACHE_QUEUE);
+await boss.work(RETENTION_AI_CACHE_QUEUE, async () => {
+  await runRetentionAiCache(db);
+});
+await boss.schedule(RETENTION_AI_CACHE_QUEUE, '0 4 1 * *'); // 04:00 UTC 1st of month
+
+// performance: weekly — 7-year window; heavy archival job
+await boss.createQueue(RETENTION_PERFORMANCE_QUEUE);
+await boss.work(RETENTION_PERFORMANCE_QUEUE, async () => {
+  await runRetentionPerformance(db);
+});
+await boss.schedule(RETENTION_PERFORMANCE_QUEUE, '0 5 * * 0'); // 05:00 UTC every Sunday
+
+// terminated staff: weekly — 7-year window; anonymises old terminated staff
+await boss.createQueue(RETENTION_STAFF_QUEUE);
+await boss.work(RETENTION_STAFF_QUEUE, async () => {
+  await runRetentionTerminatedStaff(db);
+});
+await boss.schedule(RETENTION_STAFF_QUEUE, '0 6 * * 0'); // 06:00 UTC every Sunday
+
 console.log(
   'worker ready — queues:',
   ANCHOR_QUEUE,
@@ -77,4 +123,9 @@ console.log(
   EMAIL_QUEUE,
   XLSX_QUEUE,
   REFRESH_QUEUE,
+  RETENTION_AUTH_QUEUE,
+  RETENTION_EXPORTS_QUEUE,
+  RETENTION_AI_CACHE_QUEUE,
+  RETENTION_PERFORMANCE_QUEUE,
+  RETENTION_STAFF_QUEUE,
 );

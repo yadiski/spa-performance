@@ -27,6 +27,7 @@ export const auditLog = pgTable('audit_log', {
   payload: jsonb('payload').notNull(),
   ip: inet('ip'),
   ua: text('ua'),
+  requestId: text('request_id'),
   prevHash: bytea('prev_hash').notNull(),
   hash: bytea('hash').notNull(),
   chainRoot: bytea('chain_root').notNull(),

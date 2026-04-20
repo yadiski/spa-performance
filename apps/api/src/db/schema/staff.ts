@@ -14,9 +14,9 @@ export const roleEnum = pgEnum('role', [
 
 export const staff = pgTable('staff', {
   id: uuid('id').primaryKey().defaultRandom(),
+  // Nullable post-anonymization: user row is deleted after 7-year retention window.
   userId: uuid('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'restrict' })
+    .references(() => user.id, { onDelete: 'set null' })
     .unique(),
   orgId: uuid('org_id')
     .notNull()
@@ -24,12 +24,10 @@ export const staff = pgTable('staff', {
   employeeNo: text('employee_no').notNull().unique(),
   name: text('name').notNull(),
   designation: text('designation').notNull(),
-  departmentId: uuid('department_id')
-    .notNull()
-    .references(() => department.id),
-  gradeId: uuid('grade_id')
-    .notNull()
-    .references(() => grade.id),
+  // Nullable post-anonymization
+  departmentId: uuid('department_id').references(() => department.id),
+  // Nullable post-anonymization
+  gradeId: uuid('grade_id').references(() => grade.id),
   // biome-ignore lint/suspicious/noExplicitAny: drizzle self-reference requires any cast
   managerId: uuid('manager_id').references((): any => staff.id),
   hireDate: date('hire_date').notNull(),

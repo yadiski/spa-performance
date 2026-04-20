@@ -10,6 +10,8 @@ export type AuditInput = {
   payload: Record<string, unknown>;
   ip: string | null;
   ua: string | null;
+  /** HTTP request-id for cross-correlation with access logs. */
+  requestId?: string | null;
 };
 
 /**
@@ -48,9 +50,9 @@ export async function writeAudit(tx: any, input: AuditInput): Promise<Uint8Array
   const chainRoot = hash;
 
   await tx.execute(sql`
-    insert into audit_log (ts, event_type, actor_id, actor_role, target_type, target_id, payload, ip, ua, prev_hash, hash, chain_root)
+    insert into audit_log (ts, event_type, actor_id, actor_role, target_type, target_id, payload, ip, ua, request_id, prev_hash, hash, chain_root)
     values (${ts}::timestamptz, ${input.eventType}, ${input.actorId}, ${input.actorRole}, ${input.targetType}, ${input.targetId},
-            ${JSON.stringify(input.payload)}::jsonb, ${input.ip}::inet, ${input.ua}, ${prevHash}, ${hash}, ${chainRoot})
+            ${JSON.stringify(input.payload)}::jsonb, ${input.ip}::inet, ${input.ua}, ${input.requestId ?? null}, ${prevHash}, ${hash}, ${chainRoot})
   `);
   return hash;
 }

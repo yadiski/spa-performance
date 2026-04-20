@@ -96,12 +96,7 @@
         "ai_cache_feature_scope_key_content_hash_model_unique": {
           "name": "ai_cache_feature_scope_key_content_hash_model_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "feature",
-            "scope_key",
-            "content_hash",
-            "model"
-          ]
+          "columns": ["feature", "scope_key", "content_hash", "model"]
         }
       },
       "policies": {},
@@ -158,10 +153,7 @@
       "compositePrimaryKeys": {
         "ai_usage_daily_org_id_date_pk": {
           "name": "ai_usage_daily_org_id_date_pk",
-          "columns": [
-            "org_id",
-            "date"
-          ]
+          "columns": ["org_id", "date"]
         }
       },
       "uniqueConstraints": {},
@@ -198,10 +190,7 @@
       "compositePrimaryKeys": {
         "ai_rate_limit_user_id_bucket_start_pk": {
           "name": "ai_rate_limit_user_id_bucket_start_pk",
-          "columns": [
-            "user_id",
-            "bucket_start"
-          ]
+          "columns": ["user_id", "bucket_start"]
         }
       },
       "uniqueConstraints": {},
