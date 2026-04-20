@@ -11,12 +11,23 @@ import {
   saveStaffContributions,
   signPmsComment as signZod,
 } from '@spa/shared';
-import { eq, sql } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireAuth } from '../../auth/middleware';
 import { db } from '../../db/client';
-import { performanceCycle, pmsAssessment, pmsFinalSnapshot } from '../../db/schema';
+import {
+  behaviouralDimension,
+  behaviouralRating,
+  careerDevelopment,
+  performanceCycle,
+  personalGrowth,
+  pmsAssessment,
+  pmsComment,
+  pmsFinalSnapshot,
+  pmsKraRating,
+  staffContribution,
+} from '../../db/schema';
 import { staffReadScope } from '../../rbac/scope';
 import { getSignedUrl } from '../../storage/r2';
 import { openPmsWindow as openPmsWindowSvc } from '../cycle/windows';
@@ -154,6 +165,105 @@ pmsRoutes.get('/:cycleId/verify-signatures', async (c) => {
   if (!pms) return c.json({ ok: false, error: 'pms_not_found' }, 404);
   const result = await verifyPmsSignatureChain(db, pms.id);
   return c.json(result);
+});
+
+/** GET /api/v1/pms/behavioural-dimensions — rubric catalogue (any authenticated user) */
+pmsRoutes.get('/behavioural-dimensions', async (c) => {
+  const dims = await db
+    .select()
+    .from(behaviouralDimension)
+    .orderBy(asc(behaviouralDimension.order));
+  return c.json({
+    items: dims.map((d) => ({
+      code: d.code,
+      title: d.title,
+      description: d.description,
+      order: d.order,
+      anchors: d.anchors as string[],
+    })),
+  });
+});
+
+/** GET /api/v1/pms/:cycleId/state — full PMS form state for actor-accessible cycles */
+pmsRoutes.get('/:cycleId/state', async (c) => {
+  const actor = c.get('actor');
+  const cycleId = c.req.param('cycleId');
+
+  // Load cycle
+  const [cycle] = await db.select().from(performanceCycle).where(eq(performanceCycle.id, cycleId));
+  if (!cycle) return c.json({ code: 'cycle_not_found', message: 'cycle_not_found' }, 404);
+
+  // Access check: actor must be the appraisee, the direct manager, next-level, or HRA
+  const scope = await staffReadScope(db, actor);
+  const accessible = await db.execute(
+    sql`select 1 from staff where id = ${cycle.staffId} and (${scope})`,
+  );
+  const accessRows = Array.isArray(accessible)
+    ? accessible
+    : ((accessible as { rows?: unknown[] }).rows ?? []);
+  if (accessRows.length === 0) return c.json({ code: 'forbidden', message: 'forbidden' }, 403);
+
+  // Load pms_assessment (may not exist yet)
+  const [pms] = await db.select().from(pmsAssessment).where(eq(pmsAssessment.cycleId, cycleId));
+
+  if (!pms) {
+    return c.json({
+      cycle: { id: cycle.id, state: cycle.state, staffId: cycle.staffId, fy: cycle.fy },
+      pms: null,
+      kraRatings: [],
+      behavioural: [],
+      contributions: [],
+      career: null,
+      growth: null,
+      comments: [],
+    });
+  }
+
+  const [kraRatings, behaviouralRatings, contributions, careerRow, growthRow, comments] =
+    await Promise.all([
+      db.select().from(pmsKraRating).where(eq(pmsKraRating.pmsId, pms.id)),
+      db.select().from(behaviouralRating).where(eq(behaviouralRating.pmsId, pms.id)),
+      db.select().from(staffContribution).where(eq(staffContribution.pmsId, pms.id)),
+      db.select().from(careerDevelopment).where(eq(careerDevelopment.pmsId, pms.id)),
+      db.select().from(personalGrowth).where(eq(personalGrowth.pmsId, pms.id)),
+      db.select().from(pmsComment).where(eq(pmsComment.pmsId, pms.id)),
+    ]);
+
+  return c.json({
+    cycle: { id: cycle.id, state: cycle.state, staffId: cycle.staffId, fy: cycle.fy },
+    pms: { id: pms.id },
+    kraRatings: kraRatings.map((r) => ({
+      kraId: r.kraId,
+      selfRating: null,
+      finalRating: r.finalRating,
+      resultAchieved: r.resultAchieved,
+    })),
+    behavioural: behaviouralRatings.map((r) => ({
+      dimensionCode: r.dimensionCode,
+      rating: r.rating1to5,
+      anchorText: r.rubricAnchorText,
+    })),
+    contributions: contributions.map((c) => ({
+      id: c.id,
+      whenDate: c.whenDate,
+      achievement: c.achievement,
+      weightPct: c.weightPct,
+    })),
+    career:
+      careerRow[0] != null
+        ? { potentialWindow: careerRow[0].potentialWindow, notes: careerRow[0].comments }
+        : null,
+    growth:
+      growthRow[0] != null
+        ? { goals: growthRow[0].trainingNeeds, notes: growthRow[0].comments }
+        : null,
+    comments: comments.map((cm) => ({
+      role: cm.role,
+      body: cm.body,
+      signedBy: cm.signedBy,
+      signedAt: cm.signedAt,
+    })),
+  });
 });
 
 pmsRoutes.get('/:cycleId/pdf', async (c) => {
