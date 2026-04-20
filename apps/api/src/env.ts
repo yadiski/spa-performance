@@ -8,6 +8,7 @@ const schema = z.object({
   API_PORT: z.coerce.number().int().min(1).max(65535),
   WEB_ORIGIN: z.string().url(),
   RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM_EMAIL: z.string().email().optional(),
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
