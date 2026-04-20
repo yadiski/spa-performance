@@ -11,6 +11,7 @@ import {
   pmsAssessment,
   pmsFinalSnapshot,
 } from '../../db/schema';
+import { boss } from '../../jobs/queue';
 import { validate } from '../cycle/state-machine';
 import { computeScore } from './scoring';
 
@@ -188,7 +189,9 @@ export async function returnToAppraiser(
  * On re-finalize (from cycle_amendment), creates a new snapshot linked to the original.
  */
 export async function finalizePms(db: DB, actor: Actor, input: FinalizePms): Promise<Result> {
-  return await db.transaction(async (tx) => {
+  let snapshotId: string | undefined;
+
+  const result = await db.transaction(async (tx) => {
     const [cycle] = await tx
       .select()
       .from(performanceCycle)
@@ -233,6 +236,8 @@ export async function finalizePms(db: DB, actor: Actor, input: FinalizePms): Pro
       })
       .returning();
 
+    snapshotId = snapshot?.id;
+
     // Close any open amendment
     if (openAmend) {
       await tx
@@ -261,8 +266,20 @@ export async function finalizePms(db: DB, actor: Actor, input: FinalizePms): Pro
       ip: actor.ip,
       ua: actor.ua,
     });
-    return { ok: true };
+    return { ok: true } as Result;
   });
+
+  if (result.ok && snapshotId) {
+    boss
+      .send('pms.generate_pdf', {
+        cycleId: input.cycleId,
+        snapshotId,
+        actorId: actor.userId,
+      })
+      .catch(() => {});
+  }
+
+  return result;
 }
 
 /**

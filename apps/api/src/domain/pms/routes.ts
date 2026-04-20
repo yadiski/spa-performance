@@ -11,10 +11,14 @@ import {
   saveStaffContributions,
   signPmsComment as signZod,
 } from '@spa/shared';
+import { eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireAuth } from '../../auth/middleware';
 import { db } from '../../db/client';
+import { performanceCycle, pmsAssessment, pmsFinalSnapshot } from '../../db/schema';
+import { staffReadScope } from '../../rbac/scope';
+import { getSignedUrl } from '../../storage/r2';
 import { openPmsWindow as openPmsWindowSvc } from '../cycle/windows';
 import {
   saveBehaviouralRatings as saveBehaviouralRatingsSvc,
@@ -141,13 +145,49 @@ pmsRoutes.post('/sign', zValidator('json', signZod), async (c) => {
 });
 
 pmsRoutes.get('/:cycleId/verify-signatures', async (c) => {
-  const { pmsAssessment } = await import('../../db/schema');
+  const { pmsAssessment: pmsAssessmentSchema } = await import('../../db/schema');
   const { eq: eqFn } = await import('drizzle-orm');
   const [pms] = await db
     .select()
-    .from(pmsAssessment)
-    .where(eqFn(pmsAssessment.cycleId, c.req.param('cycleId')));
+    .from(pmsAssessmentSchema)
+    .where(eqFn(pmsAssessmentSchema.cycleId, c.req.param('cycleId')));
   if (!pms) return c.json({ ok: false, error: 'pms_not_found' }, 404);
   const result = await verifyPmsSignatureChain(db, pms.id);
   return c.json(result);
+});
+
+pmsRoutes.get('/:cycleId/pdf', async (c) => {
+  const actor = c.get('actor');
+  const cycleId = c.req.param('cycleId');
+
+  const [cycle] = await db.select().from(performanceCycle).where(eq(performanceCycle.id, cycleId));
+  if (!cycle) return c.json({ code: 'cycle_not_found', message: 'cycle_not_found' }, 404);
+
+  const scope = await staffReadScope(db, actor);
+  const accessible = await db.execute(
+    sql`select 1 from staff where id = ${cycle.staffId} and (${scope})`,
+  );
+  const accessRows = Array.isArray(accessible)
+    ? accessible
+    : ((accessible as { rows?: unknown[] }).rows ?? []);
+  if (accessRows.length === 0) return c.json({ code: 'forbidden', message: 'forbidden' }, 403);
+
+  const [pms] = await db.select().from(pmsAssessment).where(eq(pmsAssessment.cycleId, cycleId));
+  if (!pms) return c.json({ code: 'PDF_NOT_READY', message: 'PDF_NOT_READY' }, 404);
+
+  const [snapshot] = await db
+    .select()
+    .from(pmsFinalSnapshot)
+    .where(eq(pmsFinalSnapshot.pmsId, pms.id))
+    .orderBy(sql`finalized_at desc`)
+    .limit(1);
+
+  if (!snapshot?.pdfR2Key) {
+    return c.json({ code: 'PDF_NOT_READY', message: 'PDF_NOT_READY' }, 404);
+  }
+
+  const url = await getSignedUrl(snapshot.pdfR2Key, 86400);
+  const expiresAt = new Date(Date.now() + 86400 * 1000).toISOString();
+
+  return c.json({ url, expiresAt });
 });
