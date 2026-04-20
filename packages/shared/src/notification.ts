@@ -13,6 +13,7 @@ export const NotificationKind = {
   PmsReopened: 'pms.reopened',
   PmsPdfReady: 'pms.pdf.ready',
   ExportReady: 'export.ready',
+  ImpersonationStarted: 'impersonation.started',
 } as const;
 export type NotificationKind = (typeof NotificationKind)[keyof typeof NotificationKind];
 
@@ -29,6 +30,7 @@ export const notificationKindSchema = z.enum([
   'pms.reopened',
   'pms.pdf.ready',
   'export.ready',
+  'impersonation.started',
 ]);
 
 export const notificationPayloadSchema = z.record(z.string(), z.unknown());

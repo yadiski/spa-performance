@@ -17,8 +17,10 @@ export const auth = betterAuth({
     autoSignIn: false,
   },
   session: {
+    // Absolute expiry: 7 days
     expiresIn: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
+    // Idle timeout: 8 hours — if no request within this window, session expires
+    updateAge: 60 * 60 * 8,
   },
   advanced: { cookiePrefix: 'spa', database: { generateId: 'uuid' } },
   plugins: [twoFactor()],
