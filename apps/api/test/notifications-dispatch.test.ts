@@ -5,7 +5,7 @@ process.env.NODE_ENV ??= 'test';
 process.env.API_PORT ??= '3000';
 process.env.WEB_ORIGIN ??= 'http://localhost:5173';
 
-import { beforeEach, describe, expect, it, setDefaultTimeout } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, it, setDefaultTimeout, spyOn } from 'bun:test';
 setDefaultTimeout(30_000);
 import { NotificationKind } from '@spa/shared';
 import { eq } from 'drizzle-orm';
@@ -13,6 +13,16 @@ import postgres from 'postgres';
 import { db } from '../src/db/client';
 import * as s from '../src/db/schema';
 import { dispatchNotifications } from '../src/domain/notifications/dispatch';
+import * as queue from '../src/jobs/queue';
+
+// Intercept boss.send so tests never touch the pg-boss schema.
+const bossSendSpy = spyOn(queue.boss, 'send').mockImplementation(
+  async () => null as unknown as string,
+);
+
+afterAll(() => {
+  bossSendSpy.mockRestore();
+});
 
 describe('dispatchNotifications', () => {
   let staffId1: string;
@@ -20,6 +30,8 @@ describe('dispatchNotifications', () => {
   let staffId3: string;
 
   beforeEach(async () => {
+    bossSendSpy.mockClear();
+
     const client = postgres(process.env.DATABASE_URL!, { max: 1 });
     await client`truncate table notification, audit_log, pms_comment, personal_growth, career_development, staff_contribution, behavioural_rating, pms_kra_rating, pms_final_snapshot, cycle_amendment, pms_assessment, mid_year_checkpoint, approval_transition, kra_progress_update, kra, performance_cycle, staff_role, staff, grade, department, organization, "user" cascade`;
     await client.end({ timeout: 2 });
@@ -177,5 +189,60 @@ describe('dispatchNotifications', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]!.kind).toBe('mid_year.acked');
     expect(rows[0]!.payload).toEqual(payload);
+  });
+
+  it('enqueues one send-email job per recipient with the resolved email, kind, and payload', async () => {
+    const payload = { note: 'test enqueue' };
+
+    await db.transaction(async (tx) => {
+      await dispatchNotifications(tx, {
+        kind: NotificationKind.PmsFinalized,
+        payload,
+        recipients: [{ staffId: staffId1 }, { staffId: staffId2 }],
+      });
+    });
+
+    expect(bossSendSpy).toHaveBeenCalledTimes(2);
+
+    const calls = bossSendSpy.mock.calls as unknown as Array<
+      [string, { to: string; kind: string; payload: unknown }]
+    >;
+    const tos = calls.map((c) => c[1].to).sort();
+    expect(tos).toEqual(['staff1@t', 'staff2@t'].sort());
+
+    for (const [queueName, data] of calls) {
+      expect(queueName).toBe('notifications.send_email');
+      expect(data.kind).toBe(NotificationKind.PmsFinalized);
+      expect(data.payload).toEqual(payload);
+    }
+  });
+
+  it('skips recipients whose email cannot be resolved: boss.send not called, inserted count unaffected', async () => {
+    // Simulate a tx where the staff→user join returns no rows (email unresolvable).
+    // This exercises the console.warn + continue guard without needing an impossible DB state.
+    const payload = { note: 'skip test' };
+    const chainEnd = { limit: () => Promise.resolve([]) };
+    const mockTx = {
+      insert: (_table: unknown) => ({ values: (_rows: unknown) => Promise.resolve([]) }),
+      select: (_fields: unknown) => ({
+        from: (_t: unknown) => ({
+          innerJoin: (_t2: unknown, _cond: unknown) => ({
+            where: (_cond2: unknown) => chainEnd,
+          }),
+        }),
+      }),
+    };
+
+    // biome-ignore lint/suspicious/noExplicitAny: mock tx for skip-email test
+    const result = await dispatchNotifications(mockTx as unknown as any, {
+      kind: NotificationKind.PmsSelfReviewSubmitted,
+      payload,
+      recipients: [{ staffId: staffId1 }, { staffId: staffId2 }],
+    });
+
+    // inserted still reflects the recipient count (notification rows were "inserted")
+    expect(result).toEqual({ inserted: 2 });
+    // boss.send must NOT have been called for any recipient with no resolved email
+    expect(bossSendSpy).not.toHaveBeenCalled();
   });
 });
