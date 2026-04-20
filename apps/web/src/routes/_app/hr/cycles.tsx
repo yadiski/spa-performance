@@ -99,6 +99,20 @@ function HrCycles() {
     },
   });
 
+  // ── Create cycles for FY (all staff) ───────────────────────────────────────
+  const [createFy, setCreateFy] = useState(new Date().getFullYear());
+  const [createResult, setCreateResult] = useState<string>('');
+  const createBulkMutation = useMutation({
+    mutationFn: (fy: number) => cycleApi.createBulk(fy, { type: 'org' }),
+    onSuccess: (r) => {
+      setCreateResult(`Created ${r.created} · skipped ${r.skipped}`);
+      qc.invalidateQueries({ queryKey: ['cycle', 'list'] });
+    },
+    onError: (e) => {
+      setCreateResult(`Failed: ${String(e)}`);
+    },
+  });
+
   // ── Client-side name search ────────────────────────────────────────────────
   const allItems: CycleListItem[] = cyclesQuery.data?.items ?? [];
   const filtered = nameSearch.trim()
@@ -127,6 +141,35 @@ function HrCycles() {
             Back to HR
           </Link>
         </div>
+      </div>
+
+      {/* Create cycles for FY — run this once per financial year to open
+          the KRA drafting window for every active staff member. */}
+      <div className="bg-surface border border-hairline rounded-md p-4 flex flex-wrap items-end gap-3">
+        <div>
+          <div className="text-sm font-medium text-ink">Start cycle for FY</div>
+          <div className="text-xs text-ink-2 mt-0.5">
+            Creates a performance_cycle row in <code>kra_drafting</code> for every active staff
+            member who doesn't already have one for this FY.
+          </div>
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <input
+            type="number"
+            value={createFy}
+            onChange={(e) => setCreateFy(Number(e.target.value))}
+            className="w-24 text-sm border border-hairline rounded-sm px-2 py-1 bg-white"
+          />
+          <button
+            type="button"
+            disabled={createBulkMutation.isPending}
+            onClick={() => createBulkMutation.mutate(createFy)}
+            className="text-sm border border-hairline bg-ink text-white rounded-sm px-3 py-1.5 disabled:opacity-50"
+          >
+            {createBulkMutation.isPending ? 'Creating…' : `Start FY ${createFy}`}
+          </button>
+        </div>
+        {createResult && <div className="w-full text-xs text-ink-2">{createResult}</div>}
       </div>
 
       {/* Filters */}

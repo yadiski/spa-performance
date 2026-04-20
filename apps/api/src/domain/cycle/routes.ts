@@ -31,7 +31,7 @@ cycleRoutes.get('/current', async (c) => {
     .select()
     .from(performanceCycle)
     .where(eq(performanceCycle.staffId, actor.staffId))
-    .orderBy(asc(performanceCycle.fy))
+    .orderBy(sql`${performanceCycle.fy} desc`)
     .limit(1);
   return c.json({ cycle: row ?? null });
 });
@@ -358,4 +358,142 @@ cycleRoutes.get('/org-staff', async (c) => {
     .orderBy(sql`employee_no asc`);
 
   return c.json({ items: staffList });
+});
+
+// ── Cycle creation (HRA) ─────────────────────────────────────────────────────
+// An HRA kicks off a cycle by creating the `performance_cycle` row in
+// kra_drafting state for a staff member + FY. Without this entry point the
+// platform has no way to move any staff into the workflow at all.
+
+const createCycleBody = z.object({
+  staffId: z.string().uuid(),
+  fy: z.number().int().min(2020).max(2100),
+});
+
+cycleRoutes.post('/create', zValidator('json', createCycleBody), async (c) => {
+  const actor = c.get('actor');
+  if (!actor.roles.includes('hra')) {
+    await auditScopeViolation(db, {
+      actor,
+      targetType: 'cycle',
+      targetId: null,
+      reason: 'hra-only: create cycle',
+    });
+    throw new HTTPException(403, { message: 'forbidden' });
+  }
+
+  const { staffId, fy } = c.req.valid('json');
+
+  // Reject if a cycle already exists for (staffId, fy) — the PK on
+  // (staffId, fy) would raise anyway but a cleaner error is nicer.
+  const [existing] = await db
+    .select({ id: performanceCycle.id })
+    .from(performanceCycle)
+    .where(and(eq(performanceCycle.staffId, staffId), eq(performanceCycle.fy, fy)))
+    .limit(1);
+  if (existing) {
+    return c.json({ ok: false, error: 'cycle_already_exists', cycleId: existing.id }, 409);
+  }
+
+  const [row] = await db
+    .insert(performanceCycle)
+    .values({ staffId, fy, state: CycleState.KraDrafting })
+    .returning({ id: performanceCycle.id });
+
+  return c.json({ ok: true, cycleId: row?.id });
+});
+
+const createBulkBody = z.object({
+  fy: z.number().int().min(2020).max(2100),
+  scope: z.discriminatedUnion('type', [
+    z.object({ type: z.literal('org') }),
+    z.object({ type: z.literal('department'), departmentId: z.string().uuid() }),
+    z.object({ type: z.literal('staffIds'), staffIds: z.array(z.string().uuid()).min(1).max(500) }),
+  ]),
+});
+
+cycleRoutes.post('/create-bulk', zValidator('json', createBulkBody), async (c) => {
+  const actor = c.get('actor');
+  if (!actor.roles.includes('hra')) {
+    await auditScopeViolation(db, {
+      actor,
+      targetType: 'cycle',
+      targetId: null,
+      reason: 'hra-only: create-bulk',
+    });
+    throw new HTTPException(403, { message: 'forbidden' });
+  }
+
+  if (!actor.staffId) return c.json({ created: 0, skipped: 0 });
+  const [actorStaff] = await db
+    .select({ orgId: staff.orgId })
+    .from(staff)
+    .where(eq(staff.id, actor.staffId));
+  if (!actorStaff) return c.json({ created: 0, skipped: 0 });
+
+  const { fy, scope } = c.req.valid('json');
+
+  // Collect target staffIds based on scope.
+  let targets: Array<{ id: string }>;
+  if (scope.type === 'org') {
+    targets = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .where(and(eq(staff.orgId, actorStaff.orgId), sql`terminated_at is null`));
+  } else if (scope.type === 'department') {
+    targets = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .where(
+        and(
+          eq(staff.orgId, actorStaff.orgId),
+          eq(staff.departmentId, scope.departmentId),
+          sql`terminated_at is null`,
+        ),
+      );
+  } else {
+    targets = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .where(and(eq(staff.orgId, actorStaff.orgId), inArray(staff.id, scope.staffIds)));
+  }
+
+  if (targets.length === 0) return c.json({ created: 0, skipped: 0 });
+
+  // Skip staff that already have a cycle for this FY. No unique index yet,
+  // so do the dedupe with a query.
+  const existingRows = await db
+    .select({ staffId: performanceCycle.staffId })
+    .from(performanceCycle)
+    .where(
+      and(
+        inArray(
+          performanceCycle.staffId,
+          targets.map((t) => t.id),
+        ),
+        eq(performanceCycle.fy, fy),
+      ),
+    );
+  const existingSet = new Set(existingRows.map((r) => r.staffId));
+  const toCreate = targets.filter((t) => !existingSet.has(t.id));
+
+  if (toCreate.length === 0) {
+    return c.json({ created: 0, skipped: targets.length });
+  }
+
+  const inserted = await db
+    .insert(performanceCycle)
+    .values(
+      toCreate.map((t) => ({
+        staffId: t.id,
+        fy,
+        state: CycleState.KraDrafting,
+      })),
+    )
+    .returning({ id: performanceCycle.id });
+
+  return c.json({
+    created: inserted.length,
+    skipped: targets.length - inserted.length,
+  });
 });

@@ -142,4 +142,24 @@ export const cycleApi = {
       method: 'POST',
       body: JSON.stringify(scope),
     }),
+
+  // ── Cycle creation (HRA only) ──────────────────────────────────────────────
+
+  create: (staffId: string, fy: number) =>
+    api<{ ok: boolean; cycleId?: string; error?: string }>('/api/v1/cycle/create', {
+      method: 'POST',
+      body: JSON.stringify({ staffId, fy }),
+    }),
+
+  createBulk: (
+    fy: number,
+    scope:
+      | { type: 'org' }
+      | { type: 'department'; departmentId: string }
+      | { type: 'staffIds'; staffIds: string[] },
+  ) =>
+    api<{ created: number; skipped: number }>('/api/v1/cycle/create-bulk', {
+      method: 'POST',
+      body: JSON.stringify({ fy, scope }),
+    }),
 };
