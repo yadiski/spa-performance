@@ -8,6 +8,7 @@ import type { Actor } from '../../auth/middleware';
 import { requireAuth } from '../../auth/middleware';
 import { db } from '../../db/client';
 import { department, performanceCycle, staff } from '../../db/schema';
+import { staffReadScope } from '../../rbac/scope';
 import { openMidYearWindow, openPmsWindow } from './windows';
 
 export const cycleRoutes = new Hono();
@@ -37,7 +38,19 @@ cycleRoutes.get('/current', async (c) => {
 // ── GET /for-staff/:staffId ───────────────────────────────────────────────────
 
 cycleRoutes.get('/for-staff/:staffId', async (c) => {
+  const actor = c.get('actor');
   const staffId = c.req.param('staffId');
+
+  // Ownership check: actor must be in scope for the requested staff member
+  const scope = await staffReadScope(db, actor);
+  const accessible = await db.execute(
+    sql`select 1 from staff where id = ${staffId}::uuid and (${scope})`,
+  );
+  const accessRows = Array.isArray(accessible)
+    ? accessible
+    : ((accessible as { rows?: unknown[] }).rows ?? []);
+  if (accessRows.length === 0) return c.json({ code: 'forbidden', message: 'forbidden' }, 403);
+
   const [row] = await db
     .select()
     .from(performanceCycle)

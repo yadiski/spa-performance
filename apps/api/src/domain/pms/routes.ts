@@ -144,8 +144,24 @@ pmsRoutes.post('/reopen', zValidator('json', reopenSchema), async (c) => {
 });
 
 pmsRoutes.get('/:cycleId/score', async (c) => {
+  const actor = c.get('actor');
+  const cycleId = c.req.param('cycleId');
+
+  // Ownership check: actor must be in scope for the cycle's staff member
+  const [cycle] = await db.select().from(performanceCycle).where(eq(performanceCycle.id, cycleId));
+  if (!cycle) return c.json({ code: 'cycle_not_found', message: 'cycle_not_found' }, 404);
+
+  const scope = await staffReadScope(db, actor);
+  const accessible = await db.execute(
+    sql`select 1 from staff where id = ${cycle.staffId} and (${scope})`,
+  );
+  const accessRows = Array.isArray(accessible)
+    ? accessible
+    : ((accessible as { rows?: unknown[] }).rows ?? []);
+  if (accessRows.length === 0) return c.json({ code: 'forbidden', message: 'forbidden' }, 403);
+
   const { computeScore } = await import('./scoring');
-  const breakdown = await computeScore(db, c.req.param('cycleId'));
+  const breakdown = await computeScore(db, cycleId);
   return c.json({ breakdown });
 });
 
@@ -156,12 +172,28 @@ pmsRoutes.post('/sign', zValidator('json', signZod), async (c) => {
 });
 
 pmsRoutes.get('/:cycleId/verify-signatures', async (c) => {
+  const actor = c.get('actor');
+  const cycleId = c.req.param('cycleId');
+
+  // Ownership check: actor must be in scope for the cycle's staff member
+  const [cycle] = await db.select().from(performanceCycle).where(eq(performanceCycle.id, cycleId));
+  if (!cycle) return c.json({ ok: false, error: 'cycle_not_found' }, 404);
+
+  const scope = await staffReadScope(db, actor);
+  const accessible = await db.execute(
+    sql`select 1 from staff where id = ${cycle.staffId} and (${scope})`,
+  );
+  const accessRows = Array.isArray(accessible)
+    ? accessible
+    : ((accessible as { rows?: unknown[] }).rows ?? []);
+  if (accessRows.length === 0) return c.json({ ok: false, error: 'forbidden' }, 403);
+
   const { pmsAssessment: pmsAssessmentSchema } = await import('../../db/schema');
   const { eq: eqFn } = await import('drizzle-orm');
   const [pms] = await db
     .select()
     .from(pmsAssessmentSchema)
-    .where(eqFn(pmsAssessmentSchema.cycleId, c.req.param('cycleId')));
+    .where(eqFn(pmsAssessmentSchema.cycleId, cycleId));
   if (!pms) return c.json({ ok: false, error: 'pms_not_found' }, 404);
   const result = await verifyPmsSignatureChain(db, pms.id);
   return c.json(result);
