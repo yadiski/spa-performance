@@ -54,11 +54,22 @@ export async function dispatchNotifications(
       continue;
     }
 
-    await boss.send('notifications.send_email', {
-      to: email,
-      kind: input.kind,
-      payload: input.payload,
-    });
+    // Swallow pg-boss errors here so transition flows (and scripts that
+    // bypass a worker) don't fail the whole transaction just because the
+    // email enqueue side of the dispatcher is unhappy. This is the same
+    // fire-and-forget stance that finalizePms takes on pms.generate_pdf.
+    try {
+      await boss.send('notifications.send_email', {
+        to: email,
+        kind: input.kind,
+        payload: input.payload,
+      });
+    } catch (err) {
+      console.warn('dispatchNotifications: boss.send failed', {
+        staffId: r.staffId,
+        err: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   return { inserted: input.recipients.length };
