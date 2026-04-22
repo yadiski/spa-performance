@@ -4,14 +4,16 @@
  * cycle state machine using the real services so every dashboard, trajectory,
  * and report has realistic data.
  *
- * Distribution for FY 2026 (from the 38-staff Malaysian seed):
+ * Distribution for FY 2026 (from the 33 eligible staff — CEO + VPs
+ * excluded because they lack a full appraiser + next-level chain).
+ * EVERY eligible staff reaches mid_year_done at minimum so the mid-year
+ * report is fully populated:
  *   - 5 finalized                → dashboards + exports populated
  *   - 5 pms_awaiting_hra         → HRA finalize queue
  *   - 5 pms_awaiting_next_lvl    → next-level pending
  *   - 5 pms_awaiting_appraiser   → self-review submitted
- *   - 5 mid_year_done            → ready for PMS
- *   - 8 kra_approved             → ready for mid-year
- *   - remainder                  → left at kra_drafting
+ *   - 5 pms_self_review          → PMS window open, waiting on staff
+ *   - 8 mid_year_done            → full mid-year done, ready for PMS
  *
  * Run from repo root (so .env.local is picked up):
  *   bun apps/api/src/scripts/seed-demo-cycles.ts
@@ -476,14 +478,15 @@ async function main(): Promise<void> {
     return !!nl;
   });
 
+  // Every eligible staff reaches mid_year_done at minimum. No kra_drafting
+  // or mid_year_submitted bucket — the goal is a complete mid-year report.
   const plan: Record<string, StaffRow[]> = {
     finalized: eligible.slice(0, 5),
     awaitingHra: eligible.slice(5, 10),
     awaitingNextLevel: eligible.slice(10, 15),
     awaitingAppraiser: eligible.slice(15, 20),
-    midYearDone: eligible.slice(20, 25),
-    midYearSubmitted: eligible.slice(25, 30),
-    kraApproved: eligible.slice(30, 38),
+    pmsSelfReview: eligible.slice(20, 25),
+    midYearDone: eligible.slice(25),
   };
 
   for (const [bucket, members] of Object.entries(plan)) {
@@ -592,27 +595,22 @@ async function main(): Promise<void> {
     });
   }
 
+  for (const s of plan.pmsSelfReview!) {
+    await runOne('pmsSelfReview', s, async () => {
+      const cycleId = await ensureCycle(s.staffId);
+      const appraiser = s.managerId ? (byId.get(s.managerId) ?? null) : null;
+      await driveToMidYearDone(hra, s, appraiser, cycleId);
+      // Open PMS window but leave the appraisee in pms_self_review.
+      const open = await openPmsWindow(db, hraActor(hra), { cycleId });
+      if (!open.ok) throw new Error(`open pms: ${open.error}`);
+    });
+  }
+
   for (const s of plan.midYearDone!) {
     await runOne('midYearDone', s, async () => {
       const cycleId = await ensureCycle(s.staffId);
       const appraiser = s.managerId ? (byId.get(s.managerId) ?? null) : null;
       await driveToMidYearDone(hra, s, appraiser, cycleId);
-    });
-  }
-
-  for (const s of plan.midYearSubmitted!) {
-    await runOne('midYearSubmitted', s, async () => {
-      const cycleId = await ensureCycle(s.staffId);
-      const appraiser = s.managerId ? (byId.get(s.managerId) ?? null) : null;
-      await driveToMidYearSubmitted(hra, s, appraiser, cycleId);
-    });
-  }
-
-  for (const s of plan.kraApproved!) {
-    await runOne('kraApproved', s, async () => {
-      const cycleId = await ensureCycle(s.staffId);
-      const appraiser = s.managerId ? (byId.get(s.managerId) ?? null) : null;
-      await driveToKraApproved(hra, s, appraiser, cycleId);
     });
   }
 

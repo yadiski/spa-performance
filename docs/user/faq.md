@@ -12,7 +12,7 @@
 First, check that you are using your work email address (not a personal email). If you get "Invalid email or password":
 1. Try "Forgot password?" on the login page to reset your password.
 2. If the password reset email does not arrive within 5 minutes, check your spam folder.
-3. If you still cannot log in, contact IT at it@invenioptl.com and include your employee number.
+3. If you still cannot log in, contact IT at it@yadiski.my and include your employee number.
 
 If you see "Your account has been locked", contact IT or HR immediately. Accounts lock after too many failed login attempts and must be unlocked by IT Admin.
 
@@ -26,13 +26,13 @@ If you see "Your account has been locked", contact IT or HR immediately. Account
 4. Click the link in the email — it expires after 24 hours.
 5. Enter and confirm your new password.
 
-If you do not receive the reset email, contact IT at it@invenioptl.com.
+If you do not receive the reset email, contact IT at it@yadiski.my.
 
 ---
 
 **Q3: My account is locked. How do I unlock it?**
 
-Accounts lock automatically after 10 failed login attempts. Contact IT Admin (it@invenioptl.com) or HR Admin (hr-admin@invenioptl.com) to unlock it. Please do not attempt more logins while locked — it resets the timer.
+Accounts lock automatically after 10 failed login attempts. Contact IT Admin (it@yadiski.my) or HR Admin (hr-admin@yadiski.my) to unlock it. Please do not attempt more logins while locked — it resets the timer.
 
 ---
 
@@ -121,7 +121,7 @@ If the link has expired, log back in and click "View PDF" again to generate a ne
 
 **Q15: The PDF download link is not working. What should I do?**
 
-Links expire after 24 hours. Log back in and click "View PDF" to get a new link. If the error says "PDF not ready", the generation job may still be processing — wait 5–10 minutes and try again. If the issue persists, contact IT at it@invenioptl.com.
+Links expire after 24 hours. Log back in and click "View PDF" to get a new link. If the error says "PDF not ready", the generation job may still be processing — wait 5–10 minutes and try again. If the issue persists, contact IT at it@yadiski.my.
 
 ---
 
@@ -143,7 +143,7 @@ No. The AI summary is purely informational and does not change any stored data o
 
 **Q18: My name or email in the system is wrong. How do I fix it?**
 
-Contact IT Admin (it@invenioptl.com) with your correct name and email. They will update your records. Note: your login email must also be changed if you use it to log in.
+Contact IT Admin (it@yadiski.my) with your correct name and email. They will update your records. Note: your login email must also be changed if you use it to log in.
 
 ---
 
@@ -155,7 +155,7 @@ Cycles from previous years are accessible if they were recorded in this system. 
 
 **Q20: How do I report a bug or system problem?**
 
-Contact IT Admin at it@invenioptl.com. Include:
+Contact IT Admin at it@yadiski.my. Include:
 - Your employee number
 - What you were trying to do
 - What error message (or unexpected behaviour) you saw

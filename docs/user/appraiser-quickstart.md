@@ -154,6 +154,6 @@ Click any staff member's row to open their current form or cycle detail.
 
 ## Help
 
-Contact HR at hr-admin@invenioptl.com or IT at it@invenioptl.com.
+Contact HR at hr-admin@yadiski.my or IT at it@yadiski.my.
 
 If a staff member appears missing from your dashboard, your manager hierarchy may not be configured correctly. Contact IT Admin to verify your direct-report list.

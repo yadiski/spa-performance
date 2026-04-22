@@ -16,10 +16,10 @@ roles. Uses the seeded Malaysian demo org.
 
 | Role in the flow | Email                                     | Name                                    | Grade |
 |---|---|---|---|
-| HRA / IT admin   | `admin@invenioptl.com`                    | Daisy Yadiski (CEO)                     | E12   |
-| Next-level       | `farid.abdullah@invenioptl.local`         | Muhammad Farid bin Abdullah (VP Ops)    | E11   |
-| Appraiser        | `siti.ibrahim@invenioptl.local`           | Siti Nurhaliza binti Ibrahim (Mgr Ops)  | E09   |
-| Appraisee        | `anand.krishnan@invenioptl.local`         | Anand Krishnan (Logistics Analyst)      | E08   |
+| HRA / IT admin   | `admin@yadiski.my`                    | Daisy Yadiski (CEO)                     | E12   |
+| Next-level       | `farid.abdullah@yadiski.my`         | Muhammad Farid bin Abdullah (VP Ops)    | E11   |
+| Appraiser        | `siti.ibrahim@yadiski.my`           | Siti Nurhaliza binti Ibrahim (Mgr Ops)  | E09   |
+| Appraisee        | `anand.krishnan@yadiski.my`         | Anand Krishnan (Logistics Analyst)      | E08   |
 
 Reporting chain: Anand → Siti → Farid → Daisy.
 
@@ -27,7 +27,7 @@ Reporting chain: Anand → Siti → Farid → Daisy.
 
 ## Step 1 — HRA opens the KRA window
 
-1. Log in as **admin@invenioptl.com**.
+1. Log in as **admin@yadiski.my**.
 2. Sidebar → **HR → Cycles** or **Bulk window operations**.
 3. If no cycles exist yet for Anand, create one via bulk-windows or the
    cycles page; target state = `kra_drafting`.

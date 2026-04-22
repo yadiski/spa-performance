@@ -151,7 +151,7 @@ Triage channel: `#fy2027-support`.
 > To prepare:
 > - Log into the system at [URL] and verify your profile is up to date.
 > - Review last year's KRA if you have access to it.
-> - If you have any login issues, contact IT at it@invenioptl.com.
+> - If you have any login issues, contact IT at it@yadiski.my.
 >
 > Your appraiser and HR team are available for any questions.
 >
@@ -166,7 +166,7 @@ Triage channel: `#fy2027-support`.
 >
 > A reminder that the FY 2027 KRA window opens tomorrow morning. You will receive an in-app notification and email when your window is active.
 >
-> Please ensure you can log in today. If you have any issues, contact IT immediately at it@invenioptl.com so we can resolve them before launch.
+> Please ensure you can log in today. If you have any issues, contact IT immediately at it@yadiski.my so we can resolve them before launch.
 >
 > Regards,  
 > HR Administration

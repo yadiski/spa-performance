@@ -14,7 +14,7 @@ This guide walks you through every step you will take during the annual performa
 3. Choose a password (minimum 10 characters, at least one uppercase and one number).
 4. You are now logged in.
 
-If your invite link has expired (links are valid for 7 days), contact HR or IT at it@invenioptl.com and ask for a new invite.
+If your invite link has expired (links are valid for 7 days), contact HR or IT at it@yadiski.my and ask for a new invite.
 
 **Logging in after setup:** Visit the app URL, enter your work email and password, and click Sign In.
 
@@ -142,4 +142,4 @@ If your organization has enabled AI features, you will see an **AI Summary** pan
 | Download PDF | Dashboard → View PDF |
 | AI summary | Dashboard → AI Summary panel |
 | Forgot password | Login page → Forgot password? |
-| Help | Contact HR: hr-admin@invenioptl.com or IT: it@invenioptl.com |
+| Help | Contact HR: hr-admin@yadiski.my or IT: it@yadiski.my |

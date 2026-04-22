@@ -62,4 +62,4 @@ This decision is accepted by the Engineering and IT teams on the date above.
 
 **Revisit trigger:** Before Phase 5 launch, or when any endpoint accepting user-supplied binary content (`multipart/form-data` or equivalent) is added to the API. The code review checklist for such endpoints must include a mandatory "AV scan in place?" gate.
 
-**Owner:** IT Admin (`it@invenioptl.com`)
+**Owner:** IT Admin (`it@yadiski.my`)

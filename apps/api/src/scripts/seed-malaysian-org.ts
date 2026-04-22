@@ -65,7 +65,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0101',
     name: 'Muhammad Farid bin Abdullah',
-    email: 'farid.abdullah@invenioptl.local',
+    email: 'farid.abdullah@yadiski.my',
     designation: 'VP, Operations',
     departmentCode: 'OPS',
     gradeCode: 'E11',
@@ -75,7 +75,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0102',
     name: 'Tan Wei Ming',
-    email: 'weiming.tan@invenioptl.local',
+    email: 'weiming.tan@yadiski.my',
     designation: 'VP, Finance',
     departmentCode: 'FIN',
     gradeCode: 'E11',
@@ -85,7 +85,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0103',
     name: 'Priya Raj',
-    email: 'priya.raj@invenioptl.local',
+    email: 'priya.raj@yadiski.my',
     designation: 'VP, Information Technology',
     departmentCode: 'IT',
     gradeCode: 'E11',
@@ -95,7 +95,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0104',
     name: 'Nurul Huda binti Ismail',
-    email: 'nurulhuda.ismail@invenioptl.local',
+    email: 'nurulhuda.ismail@yadiski.my',
     designation: 'VP, Human Resources',
     departmentCode: 'HR',
     gradeCode: 'E11',
@@ -107,7 +107,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0201',
     name: 'Siti Nurhaliza binti Ibrahim',
-    email: 'siti.ibrahim@invenioptl.local',
+    email: 'siti.ibrahim@yadiski.my',
     designation: 'Manager, Logistics',
     departmentCode: 'OPS',
     gradeCode: 'E09',
@@ -117,7 +117,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0202',
     name: 'Khalid bin Osman',
-    email: 'khalid.osman@invenioptl.local',
+    email: 'khalid.osman@yadiski.my',
     designation: 'Manager, Procurement',
     departmentCode: 'OPS',
     gradeCode: 'E09',
@@ -127,7 +127,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0203',
     name: 'Anand Krishnan',
-    email: 'anand.krishnan@invenioptl.local',
+    email: 'anand.krishnan@yadiski.my',
     designation: 'Logistics Analyst',
     departmentCode: 'OPS',
     gradeCode: 'E08',
@@ -137,7 +137,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0204',
     name: 'Lee Siew Yin',
-    email: 'siewyin.lee@invenioptl.local',
+    email: 'siewyin.lee@yadiski.my',
     designation: 'Operations Executive',
     departmentCode: 'OPS',
     gradeCode: 'E07',
@@ -147,7 +147,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0205',
     name: 'Nur Aisyah binti Kamal',
-    email: 'aisyah.kamal@invenioptl.local',
+    email: 'aisyah.kamal@yadiski.my',
     designation: 'Operations Executive',
     departmentCode: 'OPS',
     gradeCode: 'E07',
@@ -157,7 +157,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0206',
     name: 'Rajesh Kumar',
-    email: 'rajesh.kumar@invenioptl.local',
+    email: 'rajesh.kumar@yadiski.my',
     designation: 'Procurement Analyst',
     departmentCode: 'OPS',
     gradeCode: 'E08',
@@ -167,7 +167,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0207',
     name: 'Chong Bee Hua',
-    email: 'beehua.chong@invenioptl.local',
+    email: 'beehua.chong@yadiski.my',
     designation: 'Procurement Executive',
     departmentCode: 'OPS',
     gradeCode: 'E07',
@@ -177,7 +177,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0208',
     name: 'Harith bin Zakaria',
-    email: 'harith.zakaria@invenioptl.local',
+    email: 'harith.zakaria@yadiski.my',
     designation: 'Operations Executive',
     departmentCode: 'OPS',
     gradeCode: 'E07',
@@ -189,7 +189,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0301',
     name: 'Wong Chee Hong',
-    email: 'cheehong.wong@invenioptl.local',
+    email: 'cheehong.wong@yadiski.my',
     designation: 'Manager, Financial Planning',
     departmentCode: 'FIN',
     gradeCode: 'E09',
@@ -199,7 +199,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0302',
     name: 'Zulkifli bin Rahman',
-    email: 'zulkifli.rahman@invenioptl.local',
+    email: 'zulkifli.rahman@yadiski.my',
     designation: 'Manager, Treasury',
     departmentCode: 'FIN',
     gradeCode: 'E09',
@@ -209,7 +209,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0303',
     name: 'Devi Nair',
-    email: 'devi.nair@invenioptl.local',
+    email: 'devi.nair@yadiski.my',
     designation: 'Finance Analyst',
     departmentCode: 'FIN',
     gradeCode: 'E08',
@@ -219,7 +219,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0304',
     name: 'Lim Mei Ling',
-    email: 'meiling.lim@invenioptl.local',
+    email: 'meiling.lim@yadiski.my',
     designation: 'Finance Executive',
     departmentCode: 'FIN',
     gradeCode: 'E07',
@@ -229,7 +229,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0305',
     name: 'Fatimah binti Abu Bakar',
-    email: 'fatimah.abubakar@invenioptl.local',
+    email: 'fatimah.abubakar@yadiski.my',
     designation: 'Finance Executive',
     departmentCode: 'FIN',
     gradeCode: 'E07',
@@ -239,7 +239,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0306',
     name: 'Ng Kok Keong',
-    email: 'kokkeong.ng@invenioptl.local',
+    email: 'kokkeong.ng@yadiski.my',
     designation: 'Treasury Analyst',
     departmentCode: 'FIN',
     gradeCode: 'E08',
@@ -249,7 +249,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0307',
     name: 'Kumar Subramaniam',
-    email: 'kumar.subramaniam@invenioptl.local',
+    email: 'kumar.subramaniam@yadiski.my',
     designation: 'Treasury Executive',
     departmentCode: 'FIN',
     gradeCode: 'E07',
@@ -261,7 +261,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0401',
     name: 'Ahmad Hafiz bin Zainal',
-    email: 'hafiz.zainal@invenioptl.local',
+    email: 'hafiz.zainal@yadiski.my',
     designation: 'Manager, Platform Engineering',
     departmentCode: 'IT',
     gradeCode: 'E09',
@@ -271,7 +271,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0402',
     name: 'Cheong Li Qin',
-    email: 'liqin.cheong@invenioptl.local',
+    email: 'liqin.cheong@yadiski.my',
     designation: 'Manager, Data Engineering',
     departmentCode: 'IT',
     gradeCode: 'E09',
@@ -281,7 +281,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0403',
     name: 'Meena Pillai',
-    email: 'meena.pillai@invenioptl.local',
+    email: 'meena.pillai@yadiski.my',
     designation: 'Manager, Security',
     departmentCode: 'IT',
     gradeCode: 'E09',
@@ -291,7 +291,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0404',
     name: 'Faizal bin Yusof',
-    email: 'faizal.yusof@invenioptl.local',
+    email: 'faizal.yusof@yadiski.my',
     designation: 'Senior Engineer',
     departmentCode: 'IT',
     gradeCode: 'E08',
@@ -301,7 +301,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0405',
     name: 'Ooi Jing Hui',
-    email: 'jinghui.ooi@invenioptl.local',
+    email: 'jinghui.ooi@yadiski.my',
     designation: 'Senior Engineer',
     departmentCode: 'IT',
     gradeCode: 'E08',
@@ -311,7 +311,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0406',
     name: 'Ravi Shankar',
-    email: 'ravi.shankar@invenioptl.local',
+    email: 'ravi.shankar@yadiski.my',
     designation: 'Engineer',
     departmentCode: 'IT',
     gradeCode: 'E07',
@@ -321,7 +321,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0407',
     name: 'Nur Syafiqah binti Rahim',
-    email: 'syafiqah.rahim@invenioptl.local',
+    email: 'syafiqah.rahim@yadiski.my',
     designation: 'Engineer',
     departmentCode: 'IT',
     gradeCode: 'E07',
@@ -331,7 +331,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0408',
     name: 'Tan Hui Xin',
-    email: 'huixin.tan@invenioptl.local',
+    email: 'huixin.tan@yadiski.my',
     designation: 'Data Engineer',
     departmentCode: 'IT',
     gradeCode: 'E08',
@@ -341,7 +341,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0409',
     name: 'Muhammad Irfan bin Hamid',
-    email: 'irfan.hamid@invenioptl.local',
+    email: 'irfan.hamid@yadiski.my',
     designation: 'Data Analyst',
     departmentCode: 'IT',
     gradeCode: 'E07',
@@ -351,7 +351,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0410',
     name: 'Nisha Devi Pillai',
-    email: 'nisha.pillai@invenioptl.local',
+    email: 'nisha.pillai@yadiski.my',
     designation: 'Data Analyst',
     departmentCode: 'IT',
     gradeCode: 'E07',
@@ -361,7 +361,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0411',
     name: 'Azman bin Ismail',
-    email: 'azman.ismail@invenioptl.local',
+    email: 'azman.ismail@yadiski.my',
     designation: 'Security Analyst',
     departmentCode: 'IT',
     gradeCode: 'E08',
@@ -371,7 +371,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0412',
     name: 'Aisyah binti Sulaiman',
-    email: 'aisyah.sulaiman@invenioptl.local',
+    email: 'aisyah.sulaiman@yadiski.my',
     designation: 'Security Engineer',
     departmentCode: 'IT',
     gradeCode: 'E07',
@@ -383,7 +383,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0501',
     name: 'Maryam binti Yusuf',
-    email: 'maryam.yusuf@invenioptl.local',
+    email: 'maryam.yusuf@yadiski.my',
     designation: 'Manager, Talent Acquisition',
     departmentCode: 'HR',
     gradeCode: 'E09',
@@ -393,7 +393,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0502',
     name: 'Raja Kumar',
-    email: 'raja.kumar@invenioptl.local',
+    email: 'raja.kumar@yadiski.my',
     designation: 'Manager, Employee Relations',
     departmentCode: 'HR',
     gradeCode: 'E09',
@@ -403,7 +403,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0503',
     name: 'Lim Hui Lin',
-    email: 'huilin.lim@invenioptl.local',
+    email: 'huilin.lim@yadiski.my',
     designation: 'Talent Acquisition Executive',
     departmentCode: 'HR',
     gradeCode: 'E07',
@@ -413,7 +413,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0504',
     name: 'Hafsah binti Abdul Rahman',
-    email: 'hafsah.rahman@invenioptl.local',
+    email: 'hafsah.rahman@yadiski.my',
     designation: 'HR Business Partner',
     departmentCode: 'HR',
     gradeCode: 'E08',
@@ -423,7 +423,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0505',
     name: 'Cheah Yik Meng',
-    email: 'yikmeng.cheah@invenioptl.local',
+    email: 'yikmeng.cheah@yadiski.my',
     designation: 'Employee Relations Executive',
     departmentCode: 'HR',
     gradeCode: 'E07',
@@ -433,7 +433,7 @@ const STAFF: Employee[] = [
   {
     no: 'E0506',
     name: 'Indrani Raman',
-    email: 'indrani.raman@invenioptl.local',
+    email: 'indrani.raman@yadiski.my',
     designation: 'HR Operations Executive',
     departmentCode: 'HR',
     gradeCode: 'E07',

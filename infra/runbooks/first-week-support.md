@@ -104,7 +104,7 @@ Examples:
 | Channel | Purpose |
 |---------|---------|
 | `#fy2027-support` (Slack) | Real-time issue triage between IT Admin, tech lead, and HRA |
-| Shared HR inbox `hr-admin@invenioptl.com` | Staff-facing support; HR forwards technical issues to IT |
+| Shared HR inbox `hr-admin@yadiski.my` | Staff-facing support; HR forwards technical issues to IT |
 | Daily standup (09:00) | Structured review of blockers, friction, and digest review |
 | Weekly HR feedback meeting (Fridays) | Broader feedback from HR team; future roadmap items collected |
 
@@ -114,8 +114,8 @@ Examples:
 
 ```
 Staff reports issue
-  → HR Admin (hr-admin@invenioptl.com)
-    → IT Admin (it@invenioptl.com) if technical
+  → HR Admin (hr-admin@yadiski.my)
+    → IT Admin (it@yadiski.my) if technical
       → Tech Lead (direct message or phone) if blocker not resolving
         → Product Owner if rollback or scope decision needed
 ```

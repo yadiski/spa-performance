@@ -269,6 +269,6 @@ If masking fails partway through, the SQL is wrapped in a transaction — it wil
 
 | Role | Person | Contact |
 |------|--------|---------|
-| IT Admin (script executor) | IT team | it@invenioptl.com |
-| HRA sign-off | HR Admin | hr-admin@invenioptl.com |
+| IT Admin (script executor) | IT team | it@yadiski.my |
+| HRA sign-off | HR Admin | hr-admin@yadiski.my |
 | Railway support | support.railway.app | Ticket via dashboard |

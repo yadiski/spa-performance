@@ -87,7 +87,7 @@ Send the rollback user notification (template below) from the HR admin email to 
 >
 > We will communicate a new go-live date once the issue is resolved. We apologise for the inconvenience.
 >
-> For urgent queries, contact it@invenioptl.com or hr-admin@invenioptl.com.
+> For urgent queries, contact it@yadiski.my or hr-admin@yadiski.my.
 >
 > Regards,  
 > HR Administration
